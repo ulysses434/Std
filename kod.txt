@@ -1,0 +1,3 @@
+FTP ADDRESS: https://ftp.praktikum-services.tech
+Логин: techuser
+Пароль: techuser
