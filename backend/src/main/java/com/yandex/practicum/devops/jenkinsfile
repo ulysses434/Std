@@ -2,7 +2,7 @@ pipeline {
     agent any //
 
     triggers {
-        pollism('H/5 * * * *') //
+        pollSCM('H/5 * * * *') //
     }
 }
     tools {
