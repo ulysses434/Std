@@ -21,7 +21,7 @@ pipeline {
             steps {
                 dir("forntend") {
                     sh 'npm install' //
-                    sh 'npm run build' //
+                    sh 'npm run' //
                 }
             }
         }
