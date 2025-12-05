@@ -19,7 +19,7 @@ pipeline {
             }
     }   
     post {
-        succes {
+        success {
             junit 'backend/target/surefire-reports/**/*.xml'  //
 
         }
@@ -41,7 +41,7 @@ pipeline {
 
             }
             post {
-                succes {
+                success {
                 sh'''
                  curl -X POST -H
                 'Content-type: application/json' 
