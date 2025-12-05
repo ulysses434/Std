@@ -5,9 +5,9 @@ pipeline {
         pollSCM('H/5 * * * *') //
     }
     tools {
-        maven 'maven-3.8.1' //
-        jdk 'jdk16' //
-        nodejs 'node-16' //
+        maven "maven-3.8.1" //
+        jdk "jdk16" //
+        nodejs "node-16" //
     }
     stages {
         stage('build & Test backend') {
