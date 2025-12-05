@@ -2,44 +2,36 @@ pipeline {
     agent any //
 
     triggers {
-        pollism('H/5 * * * *') //
+        pollSCM('H/5 * * * *') //
     }
-
     tools {
         maven 'maven-3.8.1' //
         jdk 'jdk16' //
         nodejs 'node-16' //
     }
-
     stages {
         stage('build & Test backend') {
             steps {
                 dir("backend") { //
                      sh 'mvn package' // 
-
+                    }
                 }
-
             }
-
+    }   
             post {
                 succes {
                     junit 'backend/target/surefire-reports/**/*.xml'  //
 
                 }
-
             }
-
         }
-
         stage('Build frontend') {
             steps {
                 dir("forntend") {
                     sh 'npm install' //
                     sh 'npm run build' //
                 }
-
             }
-
         }
 
         stage('Save artifacts') {
@@ -57,18 +49,6 @@ pipeline {
                 https://api.telegram.org/bot 5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA
                 /sendMessage
                 '''
-
-
                 }
-
             }
-
-        }             
-
-
-
-
-
-    
-
-                
+        }            
