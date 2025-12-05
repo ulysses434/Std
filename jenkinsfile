@@ -16,15 +16,7 @@ pipeline {
                      sh 'mvn package' // 
                     }
                 }
-            }
-    }   
-    post {
-        success {
-            junit 'backend/target/surefire-reports/**/*.xml'  //
-
-        }
-    }
-}
+            }   
         stage('Build frontend') {
             steps {
                 dir("forntend") {
@@ -51,4 +43,13 @@ pipeline {
                 '''
                 }
             }
-        }            
+        } 
+    }             
+    post {
+        success {
+            junit 'backend/target/surefire-reports/**/*.xml'  //
+
+        }
+    }
+}
+ 
