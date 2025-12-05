@@ -28,7 +28,7 @@ pipeline {
 
         stage('Save artifacts') {
             steps {
-                archiveArtifacts(artifacts: 'backend/target/sausagestore-0.0.1-SNAPSHOT.jar')
+                archiveArtifacts(artifacts: 'java -jar sausage-store-0.0.1-SNAPSHOT.jar')
                 archiveArtifacts(artifacts: 'frontend/dist/frontend/*')
 
             }
