@@ -19,7 +19,7 @@ stages:
 build-code-job:
   stage: build
   only:
-  changes:
+    changes:
     - backend/**/*
     - frontend/**/*
   script:
@@ -33,23 +33,23 @@ build-code-job:
     - cp backend/target/sausage-store-0.0.1-SNAPSHOT.jar sausage-store-0.0.1/sausage-store-0.0.1.jar 
     - cp -r frontend/dist/frontend sausage-store-0.0.1/public_html
   artifacts:
-  paths:
+    paths:
       - sausage-store-0.0.1/public_html
       - sausage-store-0.0.1/sausage-store-0.0.1.jar
 
-  script:
+    script:
        cd backend && mvn package
-  rules:
+    rules:
     - exists:
-    - backend/pom.xml
+      - backend/pom.xml
 
-  script: npm run build
-  rules:
+    script: npm run build
+    rules:
     - when: manual
       allow_failure: true
 
-  stages:
-    - build
+      stages:
+      - build
 
 build-backend-code-job:
   stage: build  
@@ -74,7 +74,7 @@ build-frontend-code-job:
     - npm run build
   artifacts:
     paths:
-    - frontend/dist/frontend
+      - frontend/dist/frontend
 
   telegram-notification-backend:
   stage: notify
