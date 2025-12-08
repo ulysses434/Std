@@ -37,24 +37,24 @@ build-code-job:
       - sausage-store-0.0.1/public_html
       - sausage-store-0.0.1/sausage-store-0.0.1.jar
 
-    script:
-      cd backend && mvn package
-    rules:
-    - exists:
+  script:
+    cd backend && mvn package
+  rules:
+  - exists:
       - backend/pom.xml
 
-      script: npm run build
-      rules:
-       - when: manual
+    script: npm run build
+    rules:
+    - when: manual
       allow_failure: true
 
-    stages:
-    - build
+  stages:
+  - build
 
 build-backend-code-job:
   stage: build  
   only:
-    changes:
+  changes:
     - backend/**/*
   script:
     - cd backend
@@ -74,7 +74,7 @@ build-frontend-code-job:
     - npm run build
   artifacts:
     paths:
-       - frontend/dist/frontend
+        - frontend/dist/frontend
 
   telegram-notification-backend:
   stage: notify
