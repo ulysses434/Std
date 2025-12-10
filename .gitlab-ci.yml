@@ -21,3 +21,6 @@ build-code-job:
     paths:
       - sausage-store-0.0.1/public_html
       - sausage-store-0.0.1/sausage-store-0.0.1.jar
+include:
+  - local: 'backend/.gitlab-ci.yml'
+  - local: 'frontend/.gitlab-ci.yml'
