@@ -13,6 +13,7 @@ variables:
   TELEGRAM_CHAT_ID: "-1003263328596"
   SONAR_PROJECT_KEY: "SPzqsgNcQkdX8oNod9x72"
 
+
 build-code-job:
   stage: build
   only:
@@ -175,3 +176,19 @@ telegram-notification-frontend:
     - echo "Telegram notification sent"
     - echo "=== TELEGRAM-NOTIFICATION-FRONTEND COMPLETED ==="
   needs: ["build-frontend-code-job"]
+    - backend/**/*
+    - frontend/**/*
+  script:
+    - cd backend
+    - mvn package
+    - cd ../frontend
+    - npm install
+    - npm run build
+    - cd ..
+    - mkdir sausage-store-0.0.1
+    - cp backend/target/sausage-store-0.0.1-SNAPSHOT.jar sausage-store-0.0.1/sausage-store-0.0.1.jar
+    - cp -r frontend/dist/frontend sausage-store-0.0.1/public_html
+  artifacts:
+    paths:
+      - sausage-store-0.0.1/public_html
+      - sausage-store-0.0.1/sausage-store-0.0.1.jar

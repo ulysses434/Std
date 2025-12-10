@@ -1,0 +1,23 @@
+
+build-frontend-code-job:
+  stage: build  
+  only:
+    changes:
+    - frontend/**/*
+  script:        
+    - cd frontend
+    - npm install
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/dist/frontend 
+      
+  telegram-notification-frontend:
+  stage: notify
+  only:
+    changes:
+    - frontend/**/*
+  script:
+    - curl <отправка вашего сообщения>
+  needs:
+    - build-frontend-code-job 
