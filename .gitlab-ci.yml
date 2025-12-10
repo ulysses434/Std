@@ -19,164 +19,6 @@ build-code-job:
       - backend/**/*
       - frontend/**/*
   script:
-    - echo "=== STARTING BUILD-CODE-JOB ==="
-    - echo "Job: $CI_JOB_NAME"
-    - echo "Commit: $CI_COMMIT_SHORT_SHA"
-    - echo "Branch: $CI_COMMIT_REF_NAME"
-    - echo "Project path: $CI_PROJECT_DIR"
-    - echo "Working directory: $PWD"
-    
-    - echo "--- Building backend ---"
-    - cd backend
-    - echo "Current directory: $PWD"
-    - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
-    - echo "Backend build completed"
-    
-    - echo "--- Building frontend ---"
-    - cd ../frontend
-    - echo "Current directory: $PWD"
-    - npm install
-    - npm run build
-    - echo "Frontend build completed"
-    
-    - echo "--- Preparing artifacts ---"
-    - cd ..
-    - echo "Current directory: $PWD"
-    - mkdir -p sausage-store-0.0.1
-    - cp backend/target/sausage-store-0.0.1-SNAPSHOT.jar sausage-store-0.0.1/sausage-store-0.0.1.jar
-    - cp -r frontend/dist/frontend sausage-store-0.0.1/public_html
-    - echo "Artifacts created in: sausage-store-0.0.1/"
-    - ls -la sausage-store-0.0.1/
-    - echo "=== BUILD-CODE-JOB COMPLETED ==="
-  artifacts:
-    paths:
-      - sausage-store-0.0.1/
-
-build-backend-code-job:
-  stage: build
-  only:
-    changes:
-      - backend/**/*
-  script:
-    - echo "=== STARTING BUILD-BACKEND-CODE-JOB ==="
-    - echo "Job: $CI_JOB_NAME"
-    - echo "Commit: $CI_COMMIT_SHORT_SHA"
-    - echo "Branch: $CI_COMMIT_REF_NAME"
-    - echo "Project path: $CI_PROJECT_DIR"
-    
-    - echo "--- Building backend only ---"
-    - cd backend
-    - echo "Current directory: $PWD"
-    - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
-    - echo "Backend artifact created"
-    - ls -lh target/sausage-store-0.0.1-SNAPSHOT.jar
-    - echo "=== BUILD-BACKEND-CODE-JOB COMPLETED ==="
-  artifacts:
-    paths:
-      - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
-
-sonarqube-backend-sast:
-  stage: test
-  needs: ["build-backend-code-job"]
-  only:
-    changes:
-      - backend/**/*
-    refs:
-      - main
-  image: maven:3.8-openjdk-16
-  script:
-    - echo "=== STARTING SONARQUBE-BACKEND-SAST ==="
-    - echo "Job: $CI_JOB_NAME"
-    - echo "Commit: $CI_COMMIT_SHORT_SHA"
-    - echo "Branch: $CI_COMMIT_REF_NAME"
-    
-    - echo "--- Running SonarQube analysis for backend ---"
-    - cd backend
-    - echo "Current directory: $PWD"
-    - mvn sonar:sonar -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.projectName="Backend Service" -Dsonar.host.url=https://sonarqube.praktikum-services.ru -Dsonar.login=$SONAR_TOKEN_BACKEND -Dsonar.qualitygate.wait=true
-    - echo "=== SONARQUBE-BACKEND-SAST COMPLETED ==="
-
-telegram-notification-backend:
-  stage: notify
-  only:
-    changes:
-      - backend/**/*
-  script:
-    - echo "=== STARTING TELEGRAM-NOTIFICATION-BACKEND ==="
-    - echo "Job: $CI_JOB_NAME"
-    - echo "Commit: $CI_COMMIT_SHORT_SHA"
-    - echo "Branch: $CI_COMMIT_REF_NAME"
-    
-    - echo "--- Sending Telegram notification ---"
-    - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Backend собран успешно. Коммит: $CI_COMMIT_SHORT_SHA, Ветка: $CI_COMMIT_REF_NAME\"}" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage'
-    - echo "Telegram notification sent"
-    - echo "=== TELEGRAM-NOTIFICATION-BACKEND COMPLETED ==="
-  needs: ["build-backend-code-job"]
-
-build-frontend-code-job:
-  stage: build
-  only:
-    changes:
-      - frontend/**/*
-  script:
-    - echo "=== STARTING BUILD-FRONTEND-CODE-JOB ==="
-    - echo "Job: $CI_JOB_NAME"
-    - echo "Commit: $CI_COMMIT_SHORT_SHA"
-    - echo "Branch: $CI_COMMIT_REF_NAME"
-    - echo "Project path: $CI_PROJECT_DIR"
-    
-    - echo "--- Building frontend only ---"
-    - cd frontend
-    - echo "Current directory: $PWD"
-    - npm install
-    - npm run build
-    - echo "Frontend build completed"
-    - ls -lh dist/frontend/
-    - echo "=== BUILD-FRONTEND-CODE-JOB COMPLETED ==="
-  artifacts:
-    paths:
-      - frontend/dist/frontend/
-
-sonarqube-frontend-sast:
-  stage: test
-  image: sonarsource/sonar-scanner-cli:latest
-  needs: ["build-frontend-code-job"]
-  only:
-    refs:
-      - main
-    changes:
-      - frontend/**/*
-  script:
-    - echo "=== STARTING SONARQUBE-FRONTEND-SAST ==="
-    - echo "Job: $CI_JOB_NAME"
-    - echo "Commit: $CI_COMMIT_SHORT_SHA"
-    - echo "Branch: $CI_COMMIT_REF_NAME"
-    
-    - echo "--- Running SonarQube analysis for frontend ---"
-    - cd frontend
-    - echo "Current directory: $PWD"
-    - sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=https://sonarqube.praktikum-services.ru -Dsonar.login=$SONAR_TOKEN_FRONTEND -Dsonar.sources=. -Dsonar.language=js
-    - echo "=== SONARQUBE-FRONTEND-SAST COMPLETED ==="
-
-telegram-notification-frontend:
-  stage: notify
-  only:
-    changes:
-      - frontend/**/*
-  script:
-    - echo "=== STARTING TELEGRAM-NOTIFICATION-FRONTEND ==="
-    - echo "Job: $CI_JOB_NAME"
-    - echo "Commit: $CI_COMMIT_SHORT_SHA"
-    - echo "Branch: $CI_COMMIT_REF_NAME"
-    
-    - echo "--- Sending Telegram notification ---"
-    - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Frontend собран успешно. Коммит: $CI_COMMIT_SHORT_SHA, Ветка: $CI_COMMIT_REF_NAME\"}" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage'
-    - echo "Telegram notification sent"
-    - echo "=== TELEGRAM-NOTIFICATION-FRONTEND COMPLETED ==="
-  needs: ["build-frontend-code-job"]
-    - backend/**/*
-    - frontend/**/*
-  script:
     - cd backend
     - mvn package
     - cd ../frontend
@@ -195,15 +37,15 @@ build-backend-code-job:
   stage: build  
   only:
     changes:
-    - backend/**/*
+      - backend/**/*
   script:
     - cd backend
     - mvn package
   artifacts:
     paths:
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
-  
-  telegram-notification-backend:
+
+telegram-notification-backend:
   stage: notify
   only:
     changes:
@@ -212,16 +54,16 @@ build-backend-code-job:
     - |
       curl -X POST \
         -H 'Content-Type: application/json' \
-        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Backend собран. Артефакты: $https://gitlab.praktikum-services.ru/std-ext-028-45/Sausagestore.git-/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=$CI_JOB_NAME\"}" \
+        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Backend собран. Артефакты: https://gitlab.praktikum-services.ru/std-ext-028-45/Sausagestore.git/-/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=$CI_JOB_NAME\"}" \
         https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage
   needs:
     - build-backend-code-job
 
-  build-frontend-code-job:
+build-frontend-code-job:
   stage: build  
   only:
     changes:
-    - frontend/**/*
+      - frontend/**/*
   script:        
     - cd frontend
     - npm install
@@ -229,8 +71,8 @@ build-backend-code-job:
   artifacts:
     paths:
       - frontend/dist/frontend 
-      
-  telegram-notification-frontend:
+
+telegram-notification-frontend:
   stage: notify
   only:
     changes:
@@ -239,7 +81,7 @@ build-backend-code-job:
     - |
       curl -X POST \
         -H 'Content-Type: application/json' \
-        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Frontend собран. Артефакты: $https://gitlab.praktikum-services.ru/std-ext-028-45/Sausagestore.git/-/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=$CI_JOB_NAME\"}" \
+        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Frontend собран. Артефакты: https://gitlab.praktikum-services.ru/std-ext-028-45/Sausagestore.git/-/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=$CI_JOB_NAME\"}" \
         https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage
   needs:
     - build-frontend-code-job
