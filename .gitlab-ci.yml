@@ -1,15 +1,23 @@
 stages:
- - build
- - release
+  - build
 
-build_a:
- stage: build
-
-build_b:
- stage: build
-
-release_a:  
- stage: release
-
-release_b:  
- stage: release
+build-code-job:
+  stage: build
+  only:
+    changes:
+    - backend/**/*
+    - frontend/**/*
+  script:
+    - cd backend
+    - mvn package
+    - cd ../frontend
+    - npm install
+    - npm run build
+    - cd ..
+    - mkdir sausage-store-0.0.1
+    - cp backend/target/sausage-store-0.0.1-SNAPSHOT.jar sausage-store-0.0.1/sausage-store-0.0.1.jar
+    - cp -r frontend/dist/frontend sausage-store-0.0.1/public_html
+  artifacts:
+    paths:
+      - sausage-store-0.0.1/public_html
+      - sausage-store-0.0.1/sausage-store-0.0.1.jar
