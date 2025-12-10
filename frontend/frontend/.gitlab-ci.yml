@@ -16,7 +16,7 @@ build-frontend-code-job:
   stage: notify
   only:
     changes:
-       - frontend/**/*
+      - frontend/**/*
   script:
     - |
       curl -X POST \
