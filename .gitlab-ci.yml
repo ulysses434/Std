@@ -8,7 +8,7 @@ include:
 
 build-code-job:
   stage: build
-  only:
+  rules:
     changes:
       - backend/**/*
       - frontend/**/*
@@ -25,10 +25,10 @@ build-code-job:
   artifacts:
     paths:
       - sausage-store-0.0.1/
-      
+
 build-backend-code-job:
   stage: build
-  only:
+  rules:
     changes:
       - backend/**/*
   script:
@@ -41,25 +41,11 @@ build-backend-code-job:
     paths:
       - ${CI_PROJECT_DIR}/.m2/repository
 
-semgrep-sast:
-  stage: test
-  variables:
-    COMPILE: "false"
-    SAST_JAVA_VERSION: 11
-    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
-  only:
-    changes:
-      - backend/**/*
-      - frontend/**/*
-  cache:
-    paths:
-      - ${CI_PROJECT_DIR}/.m2/repository
-
 sonarqube-backend-sast:
   stage: test
   needs:
     - build-backend-code-job
-  only:
+  rules:
     changes:
       - backend/**/*
     refs:
@@ -81,7 +67,7 @@ sonarqube-backend-sast:
 
 telegram-notification-backend:
   stage: notify
-  only:
+  rules:
     changes:
       - backend/**/*
   script:
@@ -95,7 +81,7 @@ telegram-notification-backend:
 
 build-frontend-code-job:
   stage: build
-  only:
+  rules:
     changes:
       - frontend/**/*
   script:
@@ -129,7 +115,7 @@ sonarqube-frontend-sast:
 
 telegram-notification-frontend:
   stage: notify
-  only:
+  rules:
     changes:
       - frontend/**/*
   script:
@@ -140,3 +126,17 @@ telegram-notification-frontend:
         https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage
   needs:
     - build-frontend-code-job
+
+semgrep-sast:
+  stage: test
+  variables:
+    COMPILE: "false"
+    SAST_JAVA_VERSION: 11
+    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
+  rules:
+    changes:
+      - backend/**/*
+      - frontend/**/*
+  cache:
+    paths:
+      - ${CI_PROJECT_DIR}/.m2/repository
