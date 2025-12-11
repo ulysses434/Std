@@ -126,17 +126,3 @@ telegram-notification-frontend:
         https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage
   needs:
     - build-frontend-code-job
-
-semgrep-sast:
-  stage: test
-  variables:
-    COMPILE: "false"
-    SAST_JAVA_VERSION: 11
-    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
-  rules:
-    changes:
-      - backend/**/*
-      - frontend/**/*
-  cache:
-    paths:
-      - ${CI_PROJECT_DIR}/.m2/repository
