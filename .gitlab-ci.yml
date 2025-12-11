@@ -44,6 +44,20 @@ build-backend-code-job:
     paths:
       - ${CI_PROJECT_DIR}/.m2/repository
 
+semgrep-sast:
+  stage: test
+  variables:
+    COMPILE: "false"
+    SAST_JAVA_VERSION: 11
+    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
+  only:
+    changes:
+      - backend/**/*
+      - frontend/**/*
+  cache:
+    paths:
+      - ${CI_PROJECT_DIR}/.m2/repository
+
 sonarqube-backend-sast:
   stage: test
   needs:
