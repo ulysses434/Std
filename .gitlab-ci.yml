@@ -1,18 +1,25 @@
 stages:
-  stages:
   - build
   - test
   - notify
-  
+
 include:
   - template: Security/SAST.gitlab-ci.yml
 
+variables:
+  SONAR_TOKEN_BACKEND: "058c12809bebb41825d79d611032f76a969c0117"
+  SONAR_TOKEN_FRONTEND: "6ec52280dd469aadce23176a916261228b65d986"
+  TELEGRAM_BOT_TOKEN: "5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA"
+  TELEGRAM_CHAT_ID: "-1003263328596"
+  SONAR_PROJECT_KEY: "SPzqsgNcQkdX8oNod9x72"
+
 build-code-job:
   stage: build
-  only:
-    changes:
-      - backend/**/*
-      - frontend/**/*
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - backend/**/*
+        - frontend/**/*
   script:
     - cd backend
     - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
@@ -26,12 +33,13 @@ build-code-job:
   artifacts:
     paths:
       - sausage-store-0.0.1/
-      
+
 build-backend-code-job:
   stage: build
-  only:
-    changes:
-      - backend/**/*
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - backend/**/*
   script:
     - cd backend
     - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
@@ -42,29 +50,15 @@ build-backend-code-job:
     paths:
       - ${CI_PROJECT_DIR}/.m2/repository
 
-semgrep-sast:
-  stage: test
-  variables:
-    COMPILE: "false"
-    SAST_JAVA_VERSION: 11
-    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
-  only:
-    changes:
-      - backend/**/*
-      - frontend/**/*
-  cache:
-    paths:
-      - ${CI_PROJECT_DIR}/.m2/repository
-
 sonarqube-backend-sast:
   stage: test
-  needs:
-    - build-backend-code-job
-  only:
-    changes:
-      - backend/**/*
-    refs:
-      - main
+  needs: ["build-backend-code-job"]
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - backend/**/*
+      exists:
+        - backend/**/*
   image: maven:3.8-openjdk-16
   script:
     - cd backend
@@ -79,46 +73,52 @@ sonarqube-backend-sast:
   cache:
     paths:
       - ${CI_PROJECT_DIR}/.m2/repository
+    policy: pull
 
 telegram-notification-backend:
   stage: notify
-  only:
-    changes:
-      - backend/**/*
+  needs: ["build-backend-code-job"]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - backend/**/*
+      when: on_success
   script:
     - |
       curl -X POST \
         -H 'Content-Type: application/json' \
-        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Александров Александр Backend собран успешно\n\nАртефакты доступны по ссылке:\nhttps://gitlab.praktikum-services.ru/std-ext-028-45/Sausagestore.git/-/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=build-backend-code-job\n\n🔗 Коммит: $CI_COMMIT_SHORT_SHA\n🌿 Ветка: $CI_COMMIT_REF_NAME\"}" \
-        https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage
-  needs:
-    - build-backend-code-job
+        -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Александров Александр Backend собран успешно\n\nАртефакты доступны по ссылке:\n$CI_PROJECT_URL/-/jobs/$CI_JOB_ID/artifacts/download\n\n🔗 Коммит: $CI_COMMIT_SHORT_SHA\n🌿 Ветка: $CI_COMMIT_REF_NAME\"}" \
+        https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage
 
 build-frontend-code-job:
   stage: build
-  only:
-    changes:
-      - frontend/**/*
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - frontend/**/*
   script:
     - cd frontend
-    - npm install
+    - npm ci --cache .npm --prefer-offline
     - npm run build
   artifacts:
     paths:
       - frontend/dist/frontend/
   cache:
+    key: frontend-$CI_COMMIT_REF_SLUG
     paths:
+      - frontend/.npm/
       - frontend/node_modules/
 
 sonarqube-frontend-sast:
   stage: test
-  image: sonarsource/sonar-scanner-cli:latest
-  needs:
-    - build-frontend-code-job
+  needs: ["build-frontend-code-job"]
   rules:
     - if: '$CI_COMMIT_REF_NAME == "main" && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - frontend/**/*
+      exists:
+        - frontend/**/*
+  image: sonarsource/sonar-scanner-cli:latest
   script:
     - cd frontend
     - sonar-scanner \
@@ -130,14 +130,21 @@ sonarqube-frontend-sast:
 
 telegram-notification-frontend:
   stage: notify
-  only:
-    changes:
-      - frontend/**/*
+  needs: ["build-frontend-code-job"]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - frontend/**/*
+      when: on_success
   script:
     - |
       curl -X POST \
         -H 'Content-Type: application/json' \
-        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Александров Александр Frontend собран успешно\n\nАртефакты доступны по ссылке:\nhttps://gitlab.praktikum-services.ru/std-ext-028-45/Sausagestore.git/-/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=build-frontend-code-job\n\n Коммит: $CI_COMMIT_SHORT_SHA\n Ветка: $CI_COMMIT_REF_NAME\"}" \
-        https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage
-  needs:
-    - build-frontend-code-job
+        -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Александров Александр Frontend собран успешно\n\nАртефакты доступны по ссылке:\n$CI_PROJECT_URL/-/jobs/$CI_JOB_ID/artifacts/download\n\n Коммит: $CI_COMMIT_SHORT_SHA\n Ветка: $CI_COMMIT_REF_NAME\"}" \
+        https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage
+
+cache:
+  key: maven-$CI_COMMIT_REF_SLUG
+  paths:
+    - ${CI_PROJECT_DIR}/.m2/repository
+  policy: pull-push
