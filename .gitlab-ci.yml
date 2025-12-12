@@ -1,14 +1,15 @@
 stages:
+  stages:
   - build
   - test
   - notify
-
+  
 include:
   - template: Security/SAST.gitlab-ci.yml
 
 build-code-job:
   stage: build
-  rules:
+  only:
     changes:
       - backend/**/*
       - frontend/**/*
@@ -25,10 +26,10 @@ build-code-job:
   artifacts:
     paths:
       - sausage-store-0.0.1/
-
+      
 build-backend-code-job:
   stage: build
-  rules:
+  only:
     changes:
       - backend/**/*
   script:
@@ -41,11 +42,25 @@ build-backend-code-job:
     paths:
       - ${CI_PROJECT_DIR}/.m2/repository
 
+semgrep-sast:
+  stage: test
+  variables:
+    COMPILE: "false"
+    SAST_JAVA_VERSION: 11
+    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
+  only:
+    changes:
+      - backend/**/*
+      - frontend/**/*
+  cache:
+    paths:
+      - ${CI_PROJECT_DIR}/.m2/repository
+
 sonarqube-backend-sast:
   stage: test
   needs:
     - build-backend-code-job
-  rules:
+  only:
     changes:
       - backend/**/*
     refs:
@@ -59,7 +74,7 @@ sonarqube-backend-sast:
         -Dsonar.projectKey=SPzqsgNcQkdX8oNod9x72 \
         -Dsonar.projectName="Backend Service" \
         -Dsonar.host.url=https://sonarqube.praktikum-services.ru \
-        -Dsonar.login=9e4790376e5cf2ae2b80a106fd502c4599090f15 \
+        -Dsonar.login=058c12809bebb41825d79d611032f76a969c0117 \
         -Dsonar.qualitygate.wait=true
   cache:
     paths:
@@ -67,7 +82,7 @@ sonarqube-backend-sast:
 
 telegram-notification-backend:
   stage: notify
-  rules:
+  only:
     changes:
       - backend/**/*
   script:
@@ -81,7 +96,7 @@ telegram-notification-backend:
 
 build-frontend-code-job:
   stage: build
-  rules:
+  only:
     changes:
       - frontend/**/*
   script:
@@ -109,20 +124,20 @@ sonarqube-frontend-sast:
     - sonar-scanner \
       -Dsonar.projectKey=SPzqsgNcQkdX8oNod9x72 \
       -Dsonar.host.url=https://sonarqube.praktikum-services.ru \
-      -Dsonar.login=9e4790376e5cf2ae2b80a106fd502c4599090f15 \
+      -Dsonar.login=6ec52280dd469aadce23176a916261228b65d986 \
       -Dsonar.sources=. \
       -Dsonar.language=js
 
 telegram-notification-frontend:
   stage: notify
-  rules:
+  only:
     changes:
       - frontend/**/*
   script:
     - |
       curl -X POST \
         -H 'Content-Type: application/json' \
-        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Александров Александр Frontend собран успешно\n\nАртефакты доступны по ссылке:\nhttps://gitlab.praktikum-services.ru/std-ext-028-45/Sausagestore.git/-/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=build-frontend-code-job\n\n🔗 Коммит: $CI_COMMIT_SHORT_SHA\n🌿 Ветка: $CI_COMMIT_REF_NAME\"}" \
+        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Александров Александр Frontend собран успешно\n\nАртефакты доступны по ссылке:\nhttps://gitlab.praktikum-services.ru/std-ext-028-45/Sausagestore.git/-/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=build-frontend-code-job\n\n Коммит: $CI_COMMIT_SHORT_SHA\n Ветка: $CI_COMMIT_REF_NAME\"}" \
         https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage
   needs:
     - build-frontend-code-job
