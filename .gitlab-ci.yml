@@ -20,34 +20,18 @@ build-code-job:
       - backend/**/*
       - frontend/**/*
   script:
-    - echo "Starting build job for commit: $CI_COMMIT_SHORT_SHA"
-    - echo "Working directory: $PWD"
-    - ls -la
-    - echo "Building backend..."
     - cd backend
-    - mvn --version || echo "Maven not found"
-    - mvn clean package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository -DskipTests
-    - echo "Backend build completed"
-    - echo "Building frontend..."
+    - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
     - cd ../frontend
-    - node --version || echo "Node not found"
-    - npm --version || echo "npm not found"
     - npm install
     - npm run build
-    - echo "Frontend build completed"
-    - echo "Preparing artifacts..."
     - cd ..
     - mkdir -p sausage-store-0.0.1
     - cp backend/target/sausage-store-0.0.1-SNAPSHOT.jar sausage-store-0.0.1/sausage-store-0.0.1.jar
     - cp -r frontend/dist/frontend sausage-store-0.0.1/public_html
-    - ls -la sausage-store-0.0.1/
   artifacts:
     paths:
       - sausage-store-0.0.1/
-  cache:
-    paths:
-      - .m2/repository
-      - frontend/node_modules
 
 build-backend-code-job:
   stage: build
@@ -55,22 +39,15 @@ build-backend-code-job:
     changes:
       - backend/**/*
   script:
-    - echo "Building backend only..."
-    - echo "Maven repo path: ${CI_PROJECT_DIR}/.m2/repository"
     - cd backend
-    - mvn clean compile package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
-    - ls -la target/
+    - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
   artifacts:
     paths:
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
-  cache:
-    paths:
-      - .m2/repository
 
 sonarqube-backend-sast:
   stage: test
-  needs:
-    - build-backend-code-job
+  needs: ["build-backend-code-job"]
   only:
     changes:
       - backend/**/*
@@ -78,18 +55,8 @@ sonarqube-backend-sast:
       - main
   image: maven:3.8-openjdk-16
   script:
-    - echo "Running SonarQube analysis for backend..."
     - cd backend
-    - mvn sonar:sonar \
-        -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository \
-        -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-        -Dsonar.projectName="Backend Service" \
-        -Dsonar.host.url=https://sonarqube.praktikum-services.ru \
-        -Dsonar.login=$SONAR_TOKEN_BACKEND \
-        -Dsonar.qualitygate.wait=true
-  cache:
-    paths:
-      - ${CI_PROJECT_DIR}/.m2/repository
+    - mvn sonar:sonar -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.projectName="Backend Service" -Dsonar.host.url=https://sonarqube.praktikum-services.ru -Dsonar.login=$SONAR_TOKEN_BACKEND -Dsonar.qualitygate.wait=true
 
 telegram-notification-backend:
   stage: notify
@@ -97,13 +64,8 @@ telegram-notification-backend:
     changes:
       - backend/**/*
   script:
-    - |
-      curl -s -X POST \
-        -H 'Content-Type: application/json' \
-        -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \" Backend собран успешно\n\n Коммит: $CI_COMMIT_SHORT_SHA\n Ветка: $CI_COMMIT_REF_NAME\n Job: $CI_JOB_NAME\"}" \
-        https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage || echo "Telegram notification failed (non-critical)"
-  needs:
-    - build-backend-code-job
+    - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \" Backend собран\"}" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage'
+  needs: ["build-backend-code-job"]
 
 build-frontend-code-job:
   stage: build
@@ -111,37 +73,25 @@ build-frontend-code-job:
     changes:
       - frontend/**/*
   script:
-    - echo "Building frontend only..."
     - cd frontend
     - npm install
     - npm run build
-    - ls -la dist/
   artifacts:
     paths:
       - frontend/dist/frontend/
-  cache:
-    paths:
-      - frontend/node_modules/
 
 sonarqube-frontend-sast:
   stage: test
   image: sonarsource/sonar-scanner-cli:latest
-  needs:
-    - build-frontend-code-job
+  needs: ["build-frontend-code-job"]
   only:
     refs:
       - main
     changes:
       - frontend/**/*
   script:
-    - echo "Running SonarQube analysis for frontend..."
     - cd frontend
-    - sonar-scanner \
-      -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-      -Dsonar.host.url=https://sonarqube.praktikum-services.ru \
-      -Dsonar.login=$SONAR_TOKEN_FRONTEND \
-      -Dsonar.sources=. \
-      -Dsonar.language=js
+    - sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=https://sonarqube.praktikum-services.ru -Dsonar.login=$SONAR_TOKEN_FRONTEND -Dsonar.sources=. -Dsonar.language=js
 
 telegram-notification-frontend:
   stage: notify
@@ -149,10 +99,5 @@ telegram-notification-frontend:
     changes:
       - frontend/**/*
   script:
-    - |
-      curl -s -X POST \
-        -H 'Content-Type: application/json' \
-        -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \" Frontend собран успешно\n\n Коммит: $CI_COMMIT_SHORT_SHA\n Ветка: $CI_COMMIT_REF_NAME\n Job: $CI_JOB_NAME\"}" \
-        https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage || echo "Telegram notification failed (non-critical)"
-  needs:
-    - build-frontend-code-job
+    - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \" Frontend собран\"}" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage'
+  needs: ["build-frontend-code-job"]
