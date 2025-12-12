@@ -16,88 +16,117 @@ variables:
 build-code-job:
   stage: build
   only:
-    changes:
-      - backend/**/*
-      - frontend/**/*
+    - main
+    - develop
+    - merge_requests
   script:
-    - cd backend
-    - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
-    - cd ../frontend
-    - npm install
-    - npm run build
+    - echo "Starting full build for commit: $CI_COMMIT_SHORT_SHA"
+    - echo "Building backend..."
+    - cd backend && mvn clean package -DskipTests
+    - echo "Backend build completed"
+    - echo "Building frontend..."
+    - cd ../frontend && npm ci && npm run build
+    - echo "Frontend build completed"
+    - echo "Preparing artifacts..."
     - cd ..
     - mkdir -p sausage-store-0.0.1
     - cp backend/target/sausage-store-0.0.1-SNAPSHOT.jar sausage-store-0.0.1/sausage-store-0.0.1.jar
     - cp -r frontend/dist/frontend sausage-store-0.0.1/public_html
+    - echo "Artifacts prepared in sausage-store-0.0.1/"
   artifacts:
     paths:
       - sausage-store-0.0.1/
+    expire_in: 1 week
 
 build-backend-code-job:
   stage: build
   only:
-    changes:
-      - backend/**/*
+    - main
+    - develop
+    - merge_requests
   script:
+    - echo "Building backend only..."
     - cd backend
-    - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
+    - mvn clean package -DskipTests
+    - echo "Backend artifact created: target/sausage-store-0.0.1-SNAPSHOT.jar"
   artifacts:
     paths:
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
+    expire_in: 1 week
+
+build-frontend-code-job:
+  stage: build
+  only:
+    - main
+    - develop
+    - merge_requests
+  script:
+    - echo "Building frontend only..."
+    - cd frontend
+    - npm ci
+    - npm run build
+    - echo "Frontend build completed in dist/frontend/"
+  artifacts:
+    paths:
+      - frontend/dist/frontend/
+    expire_in: 1 week
 
 sonarqube-backend-sast:
   stage: test
   needs: ["build-backend-code-job"]
   only:
-    changes:
-      - backend/**/*
-    refs:
-      - main
+    - main
   image: maven:3.8-openjdk-16
   script:
+    - echo "Running SonarQube analysis for backend..."
     - cd backend
-    - mvn sonar:sonar -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.projectName="Backend Service" -Dsonar.host.url=https://sonarqube.praktikum-services.ru -Dsonar.login=$SONAR_TOKEN_BACKEND -Dsonar.qualitygate.wait=true
-
-telegram-notification-backend:
-  stage: notify
-  only:
-    changes:
-      - backend/**/*
-  script:
-    - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \" Backend собран\"}" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage'
-  needs: ["build-backend-code-job"]
-
-build-frontend-code-job:
-  stage: build
-  only:
-    changes:
-      - frontend/**/*
-  script:
-    - cd frontend
-    - npm install
-    - npm run build
-  artifacts:
-    paths:
-      - frontend/dist/frontend/
+    - mvn sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.projectName="Backend Service" -Dsonar.host.url=https://sonarqube.praktikum-services.ru -Dsonar.login=$SONAR_TOKEN_BACKEND -Dsonar.qualitygate.wait=true
 
 sonarqube-frontend-sast:
   stage: test
-  image: sonarsource/sonar-scanner-cli:latest
   needs: ["build-frontend-code-job"]
   only:
-    refs:
-      - main
-    changes:
-      - frontend/**/*
+    - main
+  image: sonarsource/sonar-scanner-cli:latest
   script:
+    - echo "Running SonarQube analysis for frontend..."
     - cd frontend
     - sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=https://sonarqube.praktikum-services.ru -Dsonar.login=$SONAR_TOKEN_FRONTEND -Dsonar.sources=. -Dsonar.language=js
 
+telegram-notification-backend:
+  stage: notify
+  needs: ["build-backend-code-job"]
+  only:
+    - main
+    - develop
+  script:
+    - |
+      curl -s -X POST \
+        -H 'Content-Type: application/json' \
+        -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Backend собран успешно. Коммит: $CI_COMMIT_SHORT_SHA, Ветка: $CI_COMMIT_REF_NAME\"}" \
+        https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage || echo "Telegram notification sent"
+
 telegram-notification-frontend:
   stage: notify
-  only:
-    changes:
-      - frontend/**/*
-  script:
-    - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \" Frontend собран\"}" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage'
   needs: ["build-frontend-code-job"]
+  only:
+    - main
+    - develop
+  script:
+    - |
+      curl -s -X POST \
+        -H 'Content-Type: application/json' \
+        -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Frontend собран успешно. Коммит: $CI_COMMIT_SHORT_SHA, Ветка: $CI_COMMIT_REF_NAME\"}" \
+        https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage || echo "Telegram notification sent"
+
+telegram-notification-full:
+  stage: notify
+  needs: ["build-code-job"]
+  only:
+    - main
+  script:
+    - |
+      curl -s -X POST \
+        -H 'Content-Type: application/json' \
+        -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Полная сборка успешно завершена. Коммит: $CI_COMMIT_SHORT_SHA, Ветка: $CI_COMMIT_REF_NAME\"}" \
+        https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage || echo "Telegram notification sent"
