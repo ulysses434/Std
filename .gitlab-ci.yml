@@ -174,4 +174,4 @@ telegram-notification-frontend:
     - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Frontend собран успешно. Коммит: $CI_COMMIT_SHORT_SHA, Ветка: $CI_COMMIT_REF_NAME\"}" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage'
     - echo "Telegram notification sent"
     - echo "=== TELEGRAM-NOTIFICATION-FRONTEND COMPLETED ==="
-  needs: ["build-frontend-code-job"а
+  needs: ["build-frontend-code-job"]
