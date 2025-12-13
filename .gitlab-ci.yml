@@ -1,17 +1,10 @@
-stages: 
+stages:
   - build
-  - test
   - notify
+  - test
 
 include:
   - template: Security/SAST.gitlab-ci.yml
-
-variables:
-  SONAR_TOKEN_BACKEND: "058c12809bebb41825d79d611032f76a969c0117"
-  SONAR_TOKEN_FRONTEND: "6ec52280dd469aadce23176a916261228b65d986"
-  TELEGRAM_BOT_TOKEN: "5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA"
-  TELEGRAM_CHAT_ID: "-1003263328596"
-  SONAR_PROJECT_KEY: "SPzqsgNcQkdX8oNod9x72"
 
 build-code-job:
   stage: build
@@ -20,9 +13,8 @@ build-code-job:
       - backend/**/*
       - frontend/**/*
   script:
-    - echo "Starting full application build..."
     - cd backend
-    - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
+    - mvn package
     - cd ../frontend
     - npm install
     - npm run build
@@ -35,32 +27,30 @@ build-code-job:
       - sausage-store-0.0.1/
 
 build-backend-code-job:
-  stage: build
+  stage: build  
   only:
     changes:
       - backend/**/*
   script:
-    - echo "Starting backend build..."
     - cd backend
-    - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
+    - mvn package
   artifacts:
     paths:
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
 
-sonarqube-backend-sast:
+semgrep-sast:
   stage: test
-  needs: 
-    - build-backend-code-job
+  variables:
+    COMPILE: "false"
+    SAST_JAVA_VERSION: 11
+    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
   only:
     changes:
       - backend/**/*
-    refs:
-      - main
-  image: maven:3.8-openjdk-16
-  script:
-    - echo "Starting SonarQube SAST analysis for backend..."
-    - cd backend
-    - mvn sonar:sonar -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.projectName="Backend Service" -Dsonar.host.url=https://sonarqube.praktikum-services.ru -Dsonar.login=$SONAR_TOKEN_BACKEND -Dsonar.qualitygate.wait=true
+      - frontend/**/*
+  cache:
+    paths:
+      - ${CI_PROJECT_DIR}/.m2/repository
 
 telegram-notification-backend:
   stage: notify
@@ -68,38 +58,26 @@ telegram-notification-backend:
     changes:
       - backend/**/*
   script:
-    - echo "Sending Telegram notification for backend..."
-    - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Backend собран успешно. Коммит: $CI_COMMIT_SHORT_SHA, Ветка: $CI_COMMIT_REF_NAME\"}" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage'
-  needs: ["build-backend-code-job"]
+    - |
+      curl -X POST \
+        -H 'Content-Type: application/json' \
+        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Backend собран. Артефакты: https://gitlab.praktikum-services.ru/std-ext-028-45/Sausagestore.git/-/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=build-backend-code-job\"}" \
+        https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage
+  needs:
+    - build-backend-code-job
 
 build-frontend-code-job:
-  stage: build
+  stage: build  
   only:
     changes:
       - frontend/**/*
-  script:
-    - echo "Starting frontend build..."
+  script:        
     - cd frontend
     - npm install
     - npm run build
   artifacts:
     paths:
-      - frontend/dist/frontend/
-      
-sonarqube-frontend-sast:
-  stage: test
-  image: sonarsource/sonar-scanner-cli:latest
-  needs:
-    - build-frontend-code-job
-  only:
-    changes:
-      - frontend/**/*
-    refs:
-      - main
-  script:
-    - echo "Starting SonarQube SAST analysis for frontend..."
-    - cd frontend
-    - sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=https://sonarqube.praktikum-services.ru -Dsonar.login=$SONAR_TOKEN_FRONTEND -Dsonar.sources=. -Dsonar.language=js
+      - frontend/dist/frontend 
 
 telegram-notification-frontend:
   stage: notify
@@ -107,6 +85,10 @@ telegram-notification-frontend:
     changes:
       - frontend/**/*
   script:
-    - echo "Sending Telegram notification for frontend..."
-    - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Frontend собран успешно. Коммит: $CI_COMMIT_SHORT_SHA, Ветка: $CI_COMMIT_REF_NAME\"}" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage'
-  needs: ["build-frontend-code-job"]
+    - |
+      curl -X POST \
+        -H 'Content-Type: application/json' \
+        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Frontend собран. Артефакты: https://gitlab.praktikum-services.ru/std-ext-028-45/Sausagestore.git/-/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=build-frontend-code-job\"}" \
+        https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage
+  needs:
+    - build-frontend-code-job
