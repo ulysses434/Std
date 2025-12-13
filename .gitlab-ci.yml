@@ -132,7 +132,7 @@ sonarqube-frontend-sast:
   needs:
     - build-frontend-code-job
   rules:
-    - changes
+    changes:
       - frontend/**/*
   script:
     - echo "=== STARTING SONARQUBE-FRONTEND-SAST ==="
