@@ -82,7 +82,7 @@ build-frontend-code-job:
       - name:"$CI_COMMIT_REF_NAME"
       - backend/target/${CI_PROJECT_NAME}/
 
-  semgrep-sast:
+semgrep-sast:
   stage: test
   variables:
     COMPILE: "false"
