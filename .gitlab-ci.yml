@@ -57,6 +57,7 @@ build-backend-code-job:
     - echo "Backend artifact created: target/sausage-store-0.0.1-SNAPSHOT.jar"
     - echo "Starting backend build..."
     - echo $CI_COMMIT_SHORT_SHA
+    - echo "Starting backend build..."
     - cd backend
     - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
   artifacts:
@@ -105,7 +106,7 @@ telegram-notification-backend:
       - backend/**/*
   script:
     - echo "Sending Telegram notification for backend..."
-    - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \" Backend собран\"}" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage'
+    - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Backend собран успешно. Коммит: $CI_COMMIT_SHORT_SHA, Ветка: $CI_COMMIT_REF_NAME\"}" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage'
   needs: ["build-backend-code-job"]
 
 build-frontend-code-job:
@@ -119,9 +120,8 @@ build-frontend-code-job:
     - npm install
     - npm run build
   artifacts:
-    name: "$CI_COMMIT_REF_NAME"
     paths:
-      - /frontend/dist/frontend
+      - frontend/dist/frontend/
       
 sonarqube-frontend-sast:
   stage: test
@@ -132,11 +132,14 @@ sonarqube-frontend-sast:
   image: sonarsource/sonar-scanner-cli:latest
   image: 
     - sonarsource/sonar-scanner-cli:latest
+  image: sonarsource/sonar-scanner-cli:latest
   needs:
     - build-frontend-code-job
-  rules:
+  only:
     changes:
       - frontend/**/*
+    refs:
+      - main
   script:
     - echo "=== STARTING SONARQUBE-FRONTEND-SAST ==="
     - echo "Job: $CI_JOB_NAME"
@@ -188,4 +191,6 @@ telegram-notification-full:
         https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage || echo "Telegram notification sent"
     - echo "Sending Telegram notification for frontend..."
     - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \" Frontend собран\"}" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage'
+  needs: ["build-frontend-code-job"]
+    - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Frontend собран успешно. Коммит: $CI_COMMIT_SHORT_SHA, Ветка: $CI_COMMIT_REF_NAME\"}" https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage'
   needs: ["build-frontend-code-job"]
