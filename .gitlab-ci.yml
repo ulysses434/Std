@@ -85,7 +85,8 @@ build-frontend-code-job:
 
 sonarqube-backend-sast:
   stage: test
-  needs: ["build-backend-code-job"]
+  needs: 
+    - build-backend-code-job
   only:
     - main
   image: maven:3.8-openjdk-16
@@ -127,6 +128,12 @@ sonarqube-frontend-sast:
   only:
     - main
   image: sonarsource/sonar-scanner-cli:latest
+  image: sonarsource/sonar-scanner-cli:latest
+  needs:
+    - build-frontend-code-job
+  rules:
+    - changes
+      - frontend/**/*
   script:
     - echo "=== STARTING SONARQUBE-FRONTEND-SAST ==="
     - echo "Job: $CI_JOB_NAME"
