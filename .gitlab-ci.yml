@@ -129,6 +129,8 @@ sonarqube-frontend-sast:
     - main
   image: sonarsource/sonar-scanner-cli:latest
   image: sonarsource/sonar-scanner-cli:latest
+  image: 
+    - sonarsource/sonar-scanner-cli:latest
   needs:
     - build-frontend-code-job
   rules:
