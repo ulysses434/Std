@@ -50,7 +50,8 @@ build-backend-code-job:
 
 sonarqube-backend-sast:
   stage: test
-  needs: ["build-backend-code-job"]
+  needs: 
+    - build-backend-code-job
   only:
     changes:
       - backend/**/*
@@ -89,11 +90,10 @@ build-frontend-code-job:
 sonarqube-frontend-sast:
   stage: test
   image: sonarsource/sonar-scanner-cli:latest
-  needs: ["build-frontend-code-job"]
-  only:
-    refs:
-      - main
-    changes:
+  needs:
+    - build-frontend-code-job
+  rules:
+    - changes
       - frontend/**/*
   script:
     - echo "Starting SonarQube SAST analysis for frontend..."
