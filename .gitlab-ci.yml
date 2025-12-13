@@ -1,7 +1,7 @@
 stages: 
   - build
-  - notify
   - test
+  - notify
 
 include:
   - template: Security/SAST.gitlab-ci.yml
@@ -56,6 +56,7 @@ build-backend-code-job:
     - mvn clean package -DskipTests
     - echo "Backend artifact created: target/sausage-store-0.0.1-SNAPSHOT.jar"
     - echo "Starting backend build..."
+    - echo $CI_COMMIT_SHORT_SHA
     - cd backend
     - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
   artifacts:
