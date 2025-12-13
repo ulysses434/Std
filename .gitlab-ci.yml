@@ -87,6 +87,7 @@ build-frontend-code-job:
     name: "$CI_COMMIT_REF_NAME"
     paths:
       - /frontend/dist/frontend
+      
 sonarqube-frontend-sast:
   stage: test
   image: 
