@@ -14,7 +14,7 @@ build-code-job:
       - frontend/**/*
   script:
     - cd backend
-    - mvn package
+    - mvn package-Dmaven.repo.local 
     - cd ../frontend
     - npm install
     - npm run build
@@ -44,10 +44,6 @@ semgrep-sast:
     COMPILE: "false"
     SAST_JAVA_VERSION: 11
     MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
-  only:
-    changes:
-      - backend/**/*
-      - frontend/**/*
   cache:
     paths:
       - ${CI_PROJECT_DIR}/.m2/repository
