@@ -79,6 +79,8 @@ build-frontend-code-job:
     paths:
       - frontend/dist/frontend/
     expire_in: 1 week
+      - name:"$CI_COMMIT_REF_NAME"
+      - backend/target/${CI_PROJECT_NAME}/
 
 sonarqube-backend-sast:
   stage: test
@@ -115,9 +117,9 @@ build-frontend-code-job:
     - npm install
     - npm run build
   artifacts:
+    name: "$CI_COMMIT_REF_NAME"
     paths:
-      - frontend/dist/frontend/
-
+      - /frontend/dist/frontend
 sonarqube-frontend-sast:
   stage: test
   needs: ["build-frontend-code-job"]
