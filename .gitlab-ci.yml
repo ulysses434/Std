@@ -23,7 +23,7 @@ build-code-job:
     - echo "Preparing artifacts..."
     - echo "Starting full application build..."
     - cd backend
-    - mvn package
+    - mvn package-Dmaven.repo.local 
     - cd ../frontend
     - npm install
     - npm run build
