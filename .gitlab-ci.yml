@@ -89,7 +89,8 @@ build-frontend-code-job:
       - /frontend/dist/frontend
 sonarqube-frontend-sast:
   stage: test
-  image: sonarsource/sonar-scanner-cli:latest
+  image: 
+    - sonarsource/sonar-scanner-cli:latest
   needs:
     - build-frontend-code-job
   rules:
