@@ -239,11 +239,19 @@ telegram-notification-backend:
 
 telegram-notification-frontend:
   stage: notify
+<<<<<<< HEAD
   needs: ["build-frontend-code-job"]
   only:
     - main
     - develop
   script:
+=======
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
+         - frontend/**/*
+      when: on_success   
+>>>>>>> 782eef8 (z4)
     - |
       curl -s -X POST \
         -H 'Content-Type: application/json' \
