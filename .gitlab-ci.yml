@@ -9,6 +9,7 @@ include:
 build-code-job:
   stage: build
   only:
+<<<<<<< HEAD
     - main
     - develop
     - merge_requests
@@ -40,6 +41,8 @@ build-code-job:
 build-code-job:
   stage: build
   only:
+=======
+>>>>>>> 04b3bc6 (t5)
     changes:
       - backend//*
       - frontend//*
