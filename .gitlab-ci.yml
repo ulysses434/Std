@@ -84,8 +84,9 @@ telegram-notification-frontend:
   rules:
     - if: $CI_COMMIT_BRANCH
       changes:
-         - frontend/**/*
-      when: on_success   
+        - frontend/**/*
+      when: on_success
+  script:
     - |
       curl -X POST \
         -H 'Content-Type: application/json' \
