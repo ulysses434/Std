@@ -16,6 +16,7 @@ include:
 >>>>>>> 5c271bb (z8)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 build-code-job:
   stage: build
   only:
@@ -151,6 +152,8 @@ build-frontend-code-job:
 =======
 
 >>>>>>> 84ec158 (z7)
+=======
+>>>>>>> f93fe94 (x2)
 build-backend-code-job:
   stage: build
   rules:
