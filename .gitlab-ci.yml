@@ -2,7 +2,6 @@ stages:
   - build
   - test
   - notify
-
 include:
   - template: Security/SAST.gitlab-ci.yml
 
@@ -25,6 +24,21 @@ build-code-job:
   artifacts:
     paths:
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
+    
+build-backend-code-job:
+  stage: build
+  only:
+    changes:
+      - backend//*
+  script:
+    - cd backend
+    - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
+  artifacts:
+    paths:
+      - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
+  cache:
+  paths:
+    - ${CI_PROJECT_DIR}/.m2/repository
       
 sonarqube-backend-sast:
   stage: test
