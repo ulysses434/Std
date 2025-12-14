@@ -17,8 +17,9 @@ build-code-job:
          
 build-backend-code-job:
   stage: build
-  only:
-    changes:
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
       - backend/**/*
   when: always
   script:
