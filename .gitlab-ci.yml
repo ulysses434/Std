@@ -1,7 +1,18 @@
 stages:
   - build
   - notify
-  - test        
+  - test
+
+build-code-job:
+  stage: build
+  only:
+    changes:
+      - backend//*
+      - frontend//*
+  script:
+    - cd backend
+    - mvn package
+
 build-backend-code-job:
   stage: build
   rules:
