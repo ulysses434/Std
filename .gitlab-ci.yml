@@ -1,6 +1,7 @@
 stages:
   - build
   - notify
+<<<<<<< HEAD
   - test
 <<<<<<< HEAD
 include:
@@ -116,6 +117,9 @@ build-frontend-code-job:
 >>>>>>> 17d0349 (z6)
          
 >>>>>>> 80aa668 (z1)
+=======
+  - test        
+>>>>>>> fed7365 (z7)
 build-backend-code-job:
   stage: build
   rules:
