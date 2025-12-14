@@ -37,7 +37,15 @@ build-code-job:
       - sausage-store-0.0.1/
     expire_in: 1 week
 
-build-backend-code-job:
+build-code-job:
+  stage: build
+  only:
+    changes:
+      - backend//*
+      - frontend//*
+  script:
+    - cd backend
+    - mvn package
   stage: build  
   only:
 <<<<<<< HEAD
@@ -46,9 +54,13 @@ build-backend-code-job:
     - merge_requests
 =======
     changes:
+<<<<<<< HEAD
       - backend/**/*
   when: alwaus    
 >>>>>>> 99a72f7 (t5)
+=======
+      - backend//*
+>>>>>>> e254022 (t6)
   script:
     - echo "Building backend only..."
     - cd backend
@@ -60,8 +72,8 @@ build-backend-code-job:
     - cd backend
     - mvn package
   artifacts:
-    name: "CI_COMMIT_REF_NAME"
     paths:
+<<<<<<< HEAD
 <<<<<<< HEAD
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
     expire_in: 1 week
@@ -92,6 +104,10 @@ build-frontend-code-job:
       
 >>>>>>> 99a72f7 (t5)
 
+=======
+      - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
+      
+>>>>>>> e254022 (t6)
 sonarqube-backend-sast:
   stage: test
   image: maven:3.8-openjdk-16
