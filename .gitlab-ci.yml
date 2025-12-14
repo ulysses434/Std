@@ -164,10 +164,12 @@ semgrep-sast:
 
 telegram-notification-backend:
   stage: notify
-  only:
-    changes:
-      - backend/**/*
-    script:
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
+        - backend/**/*
+      when: on_success
+  script:
     - |
       curl -X POST \
         -H 'Content-Type: application/json' \
