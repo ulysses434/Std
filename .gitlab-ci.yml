@@ -10,26 +10,6 @@ build-code-job:
   stage: build
   only:
     changes:
-      - backend/**/*
-      - frontend/**/*
-  script:
-    - cd backend
-    - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository 
-    - cd ../frontend
-    - npm install
-    - npm run build
-    - cd ..
-    - mkdir -p sausage-store-0.0.1
-    - cp backend/target/sausage-store-0.0.1-SNAPSHOT.jar sausage-store-0.0.1/sausage-store-0.0.1.jar
-    - cp -r frontend/dist/frontend sausage-store-0.0.1/public_html
-  artifacts:
-    paths:
-      - sausage-store-0.0.1/
-
-build-code-job:
-  stage: build
-  only:
-    changes:
       - backend//*
       - frontend//*
   script:
