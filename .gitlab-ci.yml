@@ -249,9 +249,15 @@ telegram-notification-frontend:
   rules:
     - if: $CI_COMMIT_BRANCH
       changes:
+<<<<<<< HEAD
          - frontend/**/*
       when: on_success   
 >>>>>>> 782eef8 (z4)
+=======
+        - frontend/**/*
+      when: on_success
+  script:
+>>>>>>> de6288c (z5)
     - |
       curl -s -X POST \
         -H 'Content-Type: application/json' \
