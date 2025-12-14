@@ -2,14 +2,19 @@ stages:
   - build
   - notify
 <<<<<<< HEAD
+<<<<<<< HEAD
   - test
 <<<<<<< HEAD
 include:
   - template: Security/SAST.gitlab-ci.yml
+=======
+  - test
+>>>>>>> 84ec158 (z7)
 
 build-code-job:
   stage: build
   only:
+<<<<<<< HEAD
 <<<<<<< HEAD
     - main
     - develop
@@ -44,12 +49,15 @@ build-code-job:
   only:
 =======
 >>>>>>> 04b3bc6 (t5)
+=======
+>>>>>>> 84ec158 (z7)
     changes:
       - backend//*
       - frontend//*
   script:
     - cd backend
     - mvn package
+<<<<<<< HEAD
 <<<<<<< HEAD
   stage: build  
   only:
@@ -120,6 +128,9 @@ build-frontend-code-job:
 =======
   - test        
 >>>>>>> fed7365 (z7)
+=======
+
+>>>>>>> 84ec158 (z7)
 build-backend-code-job:
   stage: build
   rules:
