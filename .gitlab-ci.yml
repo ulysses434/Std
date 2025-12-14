@@ -48,6 +48,7 @@ build-code-job:
   script:
     - cd backend
     - mvn package
+<<<<<<< HEAD
   stage: build  
   only:
 <<<<<<< HEAD
@@ -109,20 +110,22 @@ build-frontend-code-job:
 =======
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
     
+=======
+         
+>>>>>>> 80aa668 (z1)
 build-backend-code-job:
   stage: build
   only:
     changes:
-      - backend//*
+      - backend/**/*
+  when: always
   script:
     - cd backend
-    - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
+    - mvn package 
   artifacts:
+    name: "CI_COMMIT_REF_NAME"
     paths:
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
-cache:
-  paths:
-    - ${CI_PROJECT_DIR}/.m2/repository
       
 >>>>>>> e254022 (t6)
 sonarqube-backend-sast:
@@ -161,8 +164,7 @@ semgrep-sast:
 
 telegram-notification-backend:
   stage: notify
-  rules:
-  - if: $CI_COMMIT_BRANCH
+  only:
     changes:
     - |
       curl -X POST \
