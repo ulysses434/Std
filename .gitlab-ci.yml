@@ -1,7 +1,7 @@
 stages:
   - build
-  - notify
   - test
+  - notify
 
 include:
   - template: Security/SAST.gitlab-ci.yml
@@ -40,9 +40,15 @@ build-code-job:
 build-backend-code-job:
   stage: build  
   only:
+<<<<<<< HEAD
     - main
     - develop
     - merge_requests
+=======
+    changes:
+      - backend/**/*
+  when: alwaus    
+>>>>>>> 99a72f7 (t5)
   script:
     - echo "Building backend only..."
     - cd backend
@@ -54,7 +60,9 @@ build-backend-code-job:
     - cd backend
     - mvn package
   artifacts:
+    name: "CI_COMMIT_REF_NAME"
     paths:
+<<<<<<< HEAD
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
     expire_in: 1 week
 
@@ -76,6 +84,13 @@ build-frontend-code-job:
     expire_in: 1 week
       - name:"$CI_COMMIT_REF_NAME"
       - backend/target/${CI_PROJECT_NAME}/
+=======
+      - backend/target/*
+  cache:
+    paths:  
+      - ${CI_PROJECT_DIR}/ .m2/
+      
+>>>>>>> 99a72f7 (t5)
 
 sonarqube-backend-sast:
   stage: test
@@ -86,7 +101,7 @@ sonarqube-backend-sast:
     - if: $CI_COMMIT_MESSAGE =~ /send notification/
     - changes: ["backend/**/*"]
   script: |  
-    cd backend && mvn verify sonar:sonar -Dsonar.qualitygate.wait=true -Dsonar.projectKey=$SONAR_PROJECT_KEY_BACK -Dsonar.host.url=$SONARQUBE_URL -Dsonar.login=$SONAR_LOGIN_BACK -Dsonar.projectName=$SONAR_PROJECT_NAME_BACKEND
+    cd backend && mvn verify sonar:sonar -Dsonar.qualitygate.wait=true -Dsonar.projectKey=$SONAR_PROJECT_KEY_BACK -Dsonar.host.url=$SONARQUBE_URL -Dsonar.login=$SONAR_LOGIN_BACKEND -Dsonar.projectName=$SONAR_PROJECT_NAME_BACKEND
 
 semgrep-sast:
   stage: test
@@ -115,8 +130,6 @@ telegram-notification-backend:
   stage: notify
   only:
     changes:
-      - backend/**/*
-  script:
     - |
       curl -X POST \
         -H 'Content-Type: application/json' \
@@ -152,6 +165,7 @@ sonarqube-frontend-sast:
     - build-frontend-code-job
   only:
     changes:
+<<<<<<< HEAD
       - frontend/**/*
     refs:
       - main
@@ -175,6 +189,8 @@ telegram-notification-backend:
     - main
     - develop
   script:
+=======
+>>>>>>> 99a72f7 (t5)
     - |
       curl -s -X POST \
         -H 'Content-Type: application/json' \
