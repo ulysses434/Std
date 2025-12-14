@@ -77,6 +77,17 @@ build-frontend-code-job:
       - name:"$CI_COMMIT_REF_NAME"
       - backend/target/${CI_PROJECT_NAME}/
 
+sonarqube-backend-sast:
+  stage: test
+  image: maven:3.8-openjdk-16
+  needs:
+    - build-backend-code-job
+  rules:
+    - if: $CI_COMMIT_MESSAGE =~ /send notification/
+    - changes: ["backend/**/*"]
+  script: |  
+    cd backend && mvn verify sonar:sonar -Dsonar.qualitygate.wait=true -Dsonar.projectKey=$SONAR_PROJECT_KEY_BACK -Dsonar.host.url=$SONARQUBE_URL -Dsonar.login=$SONAR_LOGIN_BACK -Dsonar.projectName=$SONAR_PROJECT_NAME_BACKEND
+
 semgrep-sast:
   stage: test
   variables:
