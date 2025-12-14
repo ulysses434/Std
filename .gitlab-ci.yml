@@ -81,8 +81,11 @@ build-frontend-code-job:
 
 telegram-notification-frontend:
   stage: notify
-  only:
-    changes:
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
+         - frontend/**/*
+      when: on_success   
     - |
       curl -X POST \
         -H 'Content-Type: application/json' \
