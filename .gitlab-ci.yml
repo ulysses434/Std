@@ -3,6 +3,7 @@ stages:
   - notify
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   - test
 <<<<<<< HEAD
 include:
@@ -10,6 +11,8 @@ include:
 =======
   - test
 >>>>>>> 84ec158 (z7)
+=======
+>>>>>>> 5c271bb (z8)
 
 build-code-job:
   stage: build
