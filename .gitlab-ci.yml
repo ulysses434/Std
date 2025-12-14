@@ -2,6 +2,7 @@ stages:
   - build
   - notify
   - test
+<<<<<<< HEAD
 include:
   - template: Security/SAST.gitlab-ci.yml
 
@@ -111,6 +112,8 @@ build-frontend-code-job:
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
     
 =======
+=======
+>>>>>>> 17d0349 (z6)
          
 >>>>>>> 80aa668 (z1)
 build-backend-code-job:
