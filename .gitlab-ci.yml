@@ -14,7 +14,7 @@ build-code-job:
       - frontend/**/*
   script:
     - cd backend
-    - mvn package-Dmaven.repo.local 
+    - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository 
     - cd ../frontend
     - npm install
     - npm run build
