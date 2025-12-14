@@ -3,20 +3,6 @@ stages:
   - test
   - notify
 
-include:
-  - template: Security/SAST.gitlab-ci.yml
-
-# Убрал этот job, так как он дублирует build-backend-code-job
-# build-code-job:
-#   stage: build
-#   only:
-#     changes:
-#       - backend//*
-#       - frontend//*
-#   script:
-#     - cd backend
-#     - mvn package
-
 build-backend-code-job:
   stage: build
   rules:
