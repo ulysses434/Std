@@ -1,8 +1,7 @@
 stages:
   - build
   - notify
-  - test
-         
+  - test        
 build-backend-code-job:
   stage: build
   rules:
