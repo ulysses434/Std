@@ -26,24 +26,26 @@ build-code-job:
     paths:
       - sausage-store-0.0.1/
 
-build-backend-code-job:
+build-code-job:
+  stage: build
+  only:
+    changes:
+      - backend//*
+      - frontend//*
+  script:
+    - cd backend
+    - mvn package
   stage: build  
   only:
     changes:
-      - backend/**/*
-  when: alwaus    
+      - backend//*
   script:
     - cd backend
     - mvn package
   artifacts:
-    name: "CI_COMMIT_REF_NAME"
     paths:
-      - backend/target/*
-  cache:
-    paths:  
-      - ${CI_PROJECT_DIR}/ .m2/
+      - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
       
-
 sonarqube-backend-sast:
   stage: test
   image: maven:3.8-openjdk-16
