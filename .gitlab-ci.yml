@@ -275,6 +275,7 @@ telegram-notification-backend:
         -H 'Content-Type: application/json' \
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Backend собран. Артефакты: https://gitlab.praktikum-services.ru/std-ext-028-45/Sausagestore.git/-/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=build-backend-code-job\"}" \
         https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage
 <<<<<<< HEAD
@@ -347,6 +348,9 @@ telegram-notification-backend:
 >>>>>>> b1c43d4 (x7)
 =======
         -d "{\"chat_id\": \"1003263328596\", \"text\": \"Backend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
+=======
+        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Backend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
+>>>>>>> 9e99b06 (xz1)
         "https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage"
 >>>>>>> 1fd5dfd (x8)
 
@@ -428,6 +432,7 @@ telegram-notification-full:
       curl -X POST \
         -H 'Content-Type: application/json' \
 <<<<<<< HEAD
+<<<<<<< HEAD
         -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Frontend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
         "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"
 >>>>>>> b1c43d4 (x7)
@@ -435,3 +440,7 @@ telegram-notification-full:
         -d "{\"chat_id\": \"1003263328596\", \"text\": \"Frontend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
           "https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage"
 >>>>>>> 1fd5dfd (x8)
+=======
+        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Frontend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
+          "https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage"
+>>>>>>> 9e99b06 (xz1)
