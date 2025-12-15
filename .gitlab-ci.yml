@@ -28,14 +28,14 @@ sonarqube-backend-sast:
   stage: test
   image: maven:3.8-openjdk-16
   rules:
-    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_BRANCH
   needs: ["build-backend-code-job"]
   script: |
     cd backend && mvn verify sonar:sonar \
       -Dsonar.qualitygate.wait=true \
       -Dsonar.projectKey=std-ext-028-45_Sausagestore_AZsiEu8gB0vRiJmVN7WG \
       -Dsonar.host.url=https://sonarqube.praktikum-services.ru \
-      -Dsonar.login=058c12809bebb41825d79d611032f76a969c0117
+      -Dsonar.login=058c12809bebb41825d79d611032f76a969c0117 \
       -Dsonar.projectName=$SONAR_PROJECT_NAME_BACKEND
 
 telegram-notification-backend:
