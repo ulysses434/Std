@@ -74,7 +74,12 @@ sonarqube-frontend-sast:
     - if: $CI_COMMIT_BRANCH
   script:
     - cd frontend
-    - sonar-scanner -Dsonar.projectKey=std-ext-028-45Front -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.praktikum-services.ru -Dsonar.login=ec52280dd4669aadce23176a916261228b65d986
+    - |
+      sonar-scanner \
+        -Dsonar.projectKey=2pzAfSXRdrSUtxzSwkLM \
+        -Dsonar.sources=. \
+        -Dsonar.host.url=https://sonarqube.praktikum-services.ru \
+        -Dsonar.login=ec52280dd4669aadce23176a916261228b65d986
 
 telegram-notification-frontend:
   stage: notify
