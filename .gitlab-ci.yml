@@ -219,7 +219,6 @@ sonarqube-backend-sast:
       -Dsonar.projectKey=std-ext-028-45_Sausagestore_AZsiEu8gB0vRiJmVN7WG \
       -Dsonar.host.url=https://sonarqube.praktikum-services.ru \
       -Dsonar.login=058c12809bebb41825d79d611032f76a969c0117 \
-      -Dsonar.projectName=$SONAR_PROJECT_NAME_BACKEND
 
 <<<<<<< HEAD
 semgrep-sast:
@@ -372,6 +371,22 @@ build-frontend-code-job:
     paths:
       - frontend/dist/
     expire_in: 1 week
+
+sonarqube-frontend-sast:
+   stage: test
+   image: sonar-scanner-cli:latest
+   services:
+     - docker:dind
+   needs:
+     - build-frontend-code-job
+   rules:
+     - changes: ["frontend/**/*"]
+   script:
+     - sonar-scanner \
+     - Dsonar.projectKey=PzqsgNcQkdX8oNod9x72 \
+     - Dsonar.sources=. \
+     - Dsonar.host.url=https://sonarqube.praktikum-services.ru \
+     - Dsonar.login=ec52280dd4669aadce23176a916261228b65d986
 
 telegram-notification-frontend:
   stage: notify
