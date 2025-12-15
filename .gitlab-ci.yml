@@ -382,7 +382,7 @@ sonarqube-frontend-sast:
     - cd frontend
     - |
       sonar-scanner \
-        -Dsonar.projectKey=2pzAfSXRdrSUtxzSwkLM \
+        -Dsonar.projectKey=PzqsgNcQkdX8oNod9x72 \
         -Dsonar.sources=. \
         -Dsonar.host.url=https://sonarqube.praktikum-services.ru \
         -Dsonar.login=ec52280dd4669aadce23176a916261228b65d986
