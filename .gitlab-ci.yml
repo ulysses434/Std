@@ -216,9 +216,9 @@ sonarqube-backend-sast:
   script: |
     cd backend && mvn verify sonar:sonar \
       -Dsonar.qualitygate.wait=true \
-      -Dsonar.projectKey=$SONAR_PROJECT_KEY_BACK \
-      -Dsonar.host.url=$SONARQUBE_URL \
-      -Dsonar.login=$SONAR_LOGIN_BACK \
+      -Dsonar.projectKey=std-ext-028-45_Sausagestore_AZsiEu8gB0vRiJmVN7WG \
+      -Dsonar.host.url=https://sonarqube.praktikum-services.ru
+      -Dsonar.login=058c12809bebb41825d79d611032f76a969c0117 \
       -Dsonar.projectName="Backend Service"
 
 <<<<<<< HEAD
@@ -388,10 +388,10 @@ sonarqube-frontend-sast:
     - cd frontend
     - |
       sonar-scanner \
-        -Dsonar.projectKey=$SONAR_PROJECT_KEY_FRONT \
+        -Dsonar.projectKey=PzqsgNcQkdX8oNod9x72
         -Dsonar.sources=. \
-        -Dsonar.host.url=$SONARQUBE_URL \
-        -Dsonar.login=$SONAR_LOGIN_FRONT
+        -Dsonar.host.url=https://sonarqube.praktikum-services.ru
+        -Dsonar.login=52280dd4669aadce23176a916261228b65d986
 
 telegram-notification-frontend:
   stage: notify
@@ -459,6 +459,7 @@ telegram-notification-full:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Frontend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
         "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"
 >>>>>>> b1c43d4 (x7)
@@ -478,3 +479,7 @@ telegram-notification-full:
         -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Frontend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
         "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage"
 >>>>>>> 1ab3938 (b1)
+=======
+        -d "{\"chat_id\": \"1003263328596\", \"text\": \"Frontend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
+        "https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage"
+>>>>>>> 37dfa79 (n1)
