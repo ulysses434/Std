@@ -377,10 +377,9 @@ sonarqube-frontend-sast:
    image: sonar-scanner-cli:latest
    services:
      - docker:dind
-   needs:
-     - build-frontend-code-job
+   needs: ["build-frontend-code-job"]
    rules:
-     - changes: ["frontend/**/*"]
+     - if: $CI_COMMIT_BRANCH
    script:
      - sonar-scanner \
      - Dsonar.projectKey=PzqsgNcQkdX8oNod9x72 \
