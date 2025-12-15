@@ -331,7 +331,7 @@ telegram-notification-backend:
         -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Backend собран успешно. Коммит: $CI_COMMIT_SHORT_SHA, Ветка: $CI_COMMIT_REF_NAME\"}" \
         https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage || echo "Telegram notification sent"
 
-  build-frontend-code-job:
+build-frontend-code-job:
   stage: build
   rules:
     - if: $CI_COMMIT_BRANCH
