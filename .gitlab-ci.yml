@@ -34,9 +34,9 @@ sonarqube-backend-sast:
     cd backend && mvn verify sonar:sonar \
       -Dsonar.qualitygate.wait=true \
       -Dsonar.projectKey=std-ext-028-45_Sausagestore_AZsiEu8gB0vRiJmVN7WG \
-      -Dsonar.host.url=https://sonarqube.praktikum-services.ru
+      -Dsonar.host.url=https://sonarqube.praktikum-services.ru \
       -Dsonar.login=058c12809bebb41825d79d611032f76a969c0117 \
-      -Dsonar.projectName="Backend Service"
+
 
 telegram-notification-backend:
   stage: notify
@@ -77,7 +77,7 @@ sonarqube-frontend-sast:
     - cd frontend
     - |
       sonar-scanner \
-        -Dsonar.projectKey=PzqsgNcQkdX8oNod9x72
+        -Dsonar.projectKey=PzqsgNcQkdX8oNod9x72 \
         -Dsonar.sources=. \
         -Dsonar.host.url=https://sonarqube.praktikum-services.ru
         -Dsonar.login=52280dd4669aadce23176a916261228b65d986
