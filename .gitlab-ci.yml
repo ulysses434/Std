@@ -67,19 +67,14 @@ build-frontend-code-job:
     expire_in: 1 week
 
 sonarqube-frontend-sast:
-   stage: test
-   image: sonarsource/sonar-scanner-cli:latest
-   services:
-     - docker:dind
-   needs: ["build-frontend-code-job"]
-   rules:
-     - if: $CI_COMMIT_BRANCH
-   script:
-     - sonar-scanner \
-     - Dsonar.projectKey=PzqsgNcQkdX8oNod9x72 \
-     - Dsonar.sources=. \
-     - Dsonar.host.url=https://sonarqube.praktikum-services.ru \
-     - Dsonar.login=ec52280dd4669aadce23176a916261228b65d986
+  stage: test
+  image: sonarsource/sonar-scanner-cli:latest
+  needs: ["build-frontend-code-job"]
+  rules:
+    - if: $CI_COMMIT_BRANCH
+  script:
+    - cd frontend
+    - sonar-scanner -Dsonar.projectKey=PzqsgNcQkdX8oNod9x72 -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.praktikum-services.ru -Dsonar.login=ec52280dd4669aadce23176a916261228b65d986
 
 telegram-notification-frontend:
   stage: notify
