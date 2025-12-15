@@ -3,6 +3,9 @@ stages:
   - test
   - notify
 
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
 build-backend-code-job:
   stage: build
   rules:
@@ -12,26 +15,11 @@ build-backend-code-job:
   script:
     - cd backend
     - mvn package
+    - echo "Start build job"
   artifacts:
     name: "backend-$CI_COMMIT_REF_NAME"
     paths:
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
-    expire_in: 1 week
-
-build-frontend-code-job:
-  stage: build
-  rules:
-    - if: $CI_COMMIT_BRANCH
-      changes:
-        - frontend/**/*
-  script:
-    - cd frontend
-    - npm install
-    - npm run build
-  artifacts:
-    paths:
-      - frontend/dist/
-    expire_in: 1 week
 
 sonarqube-backend-sast:
   stage: test
@@ -74,6 +62,21 @@ telegram-notification-backend:
         -H 'Content-Type: application/json' \
         -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Backend собран. Артефакты: https://gitlab.praktikum-services.ru/std-ext-028-45/Sausagestore.git/-/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=build-backend-code-job\"}" \
         https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage
+
+  build-frontend-code-job:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
+        - frontend/**/*
+  script:
+    - cd frontend
+    - npm install
+    - npm run build
+    - echo "Start build job"
+  artifacts:
+    paths:
+      - frontend/dist/
 
 telegram-notification-frontend:
   stage: notify
