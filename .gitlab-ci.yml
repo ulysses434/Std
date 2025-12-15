@@ -68,8 +68,7 @@ build-frontend-code-job:
 
 sonarqube-frontend-sast:
    stage: test
-   image: sonarsource/
-    sonar-scanner-cli:latest
+   image: sonarsource/sonar-scanner-cli:latest
    services:
      - docker:dind
    needs: ["build-frontend-code-job"]
