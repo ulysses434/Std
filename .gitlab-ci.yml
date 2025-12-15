@@ -79,8 +79,8 @@ sonarqube-frontend-sast:
       sonar-scanner \
         -Dsonar.projectKey=PzqsgNcQkdX8oNod9x72 \
         -Dsonar.sources=. \
-        -Dsonar.host.url=https://sonarqube.praktikum-services.ru
-        -Dsonar.login=52280dd4669aadce23176a916261228b65d986
+        -Dsonar.host.url=https://sonarqube.praktikum-services.ru \
+        -Dsonar.login=52280dd4669aadce23176a916261228b65d986 \
 
 telegram-notification-frontend:
   stage: notify
