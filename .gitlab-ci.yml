@@ -278,6 +278,7 @@ telegram-notification-backend:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Backend собран. Артефакты: https://gitlab.praktikum-services.ru/std-ext-028-45/Sausagestore.git/-/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=build-backend-code-job\"}" \
         https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage
 <<<<<<< HEAD
@@ -362,6 +363,10 @@ telegram-notification-backend:
         -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"Backend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
         "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage"
 >>>>>>> 1ab3938 (b1)
+=======
+        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Backend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
+        "https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage"
+>>>>>>> 6e863ba (Finish1)
 
 build-frontend-code-job:
   stage: build
@@ -464,6 +469,7 @@ telegram-notification-full:
 >>>>>>> 1fd5dfd (x8)
 =======
         -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Frontend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
+<<<<<<< HEAD
           "https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage"
 >>>>>>> 9e99b06 (xz1)
 =======
@@ -482,3 +488,6 @@ telegram-notification-full:
         -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Frontend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
         "https://api.telegram.org/bot-5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage"
 >>>>>>> a2392bf (finish)
+=======
+        "https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage"
+>>>>>>> 6e863ba (Finish1)
