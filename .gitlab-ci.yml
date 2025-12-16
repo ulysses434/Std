@@ -392,7 +392,8 @@ sonarqube-frontend-sast:
         -Dsonar.sources=. \
         -Dsonar.host.url=https://sonarqube.praktikum-services.ru \
         -Dsonar.login=52280dd4669aadce23176a916261228b65d986 \
-
+        -Dsonar.language=javascript
+        
 telegram-notification-frontend:
   stage: notify
 <<<<<<< HEAD
