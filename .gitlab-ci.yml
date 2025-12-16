@@ -386,7 +386,7 @@ sonarqube-frontend-sast:
     - if: $CI_COMMIT_BRANCH
   script:
     - cd frontend
-      sonar-scanner.bat -D"sonar.projectKey=PzqsgNcQkdX8oNod9x72" -D"sonar.sources=." -D"sonar.host.url=https://sonarqube.praktikum-services.ru" -D"sonar.login=52280dd4669aadce23176a916261228b65d986"
+    - sonar-scanner -Dsonar.projectKey=PzqsgNcQkdX8oNod9x72 -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.praktikum-services.ru -Dsonar.login=52280dd4669aadce23176a916261228b65d986  
 telegram-notification-frontend:
   stage: notify
 <<<<<<< HEAD
