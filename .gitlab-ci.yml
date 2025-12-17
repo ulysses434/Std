@@ -209,17 +209,17 @@ build-frontend-code-job:
 >>>>>>> 3bda3a0 (x1)
 sonarqube-backend-sast:
   stage: test
-  image: maven:3.9.6-openjdk-17
+  image: maven:3.8-openjdk-16
   rules:
     - if: $CI_COMMIT_BRANCH
   needs: ["build-backend-code-job"]
   script: |
-    cd backend && mvn clean verify sonar:sonar \
-      -Dsonar.qualitygate.wait=false \
-      -Dsonar.projectKey=$SONAR_PROJECT_KEY_BACK \
+    cd backend && mvn verify sonar:sonar \
+      -Dsonar.qualitygate.wait=true \
+      -Dsonar.projectKey=std-ext-028-45_Sausagestore_AZsiEu8gB0vRiJmVN7WG \
       -Dsonar.host.url=$SONARQUBE_URL \
-      -Dsonar.login=$SONAR_LOGIN_BACK \
-      -Dsonar.scm.disabled=true
+      -Dsonar.login=058c12809bebb41825d79d611032f76a969c0117 \
+
 
 <<<<<<< HEAD
 semgrep-sast:
