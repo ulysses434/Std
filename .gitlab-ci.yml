@@ -566,8 +566,20 @@ include:
 >>>>>>> c9aa23c (F1)
 =======
 
+<<<<<<< HEAD
 build_a:
   stage: build
   script:
     - echo "Building a..."
 >>>>>>> ac01b43 (F8)
+=======
+semgrep-sast:
+  stage: test
+  variables:
+    COMPILE: "false"
+    SAST_JAVA_VERSION: 11
+    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
+  cache:
+    paths:
+      - ${CI_PROJECT_DIR}/.m2/repository
+>>>>>>> 8d1f95a (V1)

@@ -1,10 +1,3 @@
-variables:
-  SONARQUBE_URL: "https://sonarqube.praktikum-services.ru"
-
-build_b:
-  stage: build
-  script:
-    - echo "Building b..."
 
 build-backend-code-job:
   stage: build
@@ -30,7 +23,21 @@ sonarqube-backend-sast:
   script: |
     cd backend && mvn verify sonar:sonar \
       -Dsonar.qualitygate.wait=true \
-      -Dsonar.projectKey=std-ext-028-45_Sausagestore_AZsiEu8gB0vRiJmVN7WG \
+      -Dsonar.projectKey=$SONAR_PROJECT_KEY_BACK \
       -Dsonar.host.url=$SONARQUBE_URL \
-      -Dsonar.login=058c12809bebb41825d79d611032f76a969c0117 \
+      -Dsonar.login=$SONAR_LOGIN_BACK \
       -Dsonar.projectName="28-45_АлександровАлександр_Backend"
+        
+telegram-notification-backend:
+  stage: notify
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      when: on_success
+  needs: ["build-backend-code-job"]
+  script:
+    - |
+      ARTIFACT_URL="${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/download"
+      curl -X POST \
+        -H 'Content-Type: application/json' \
+        -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Backend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
+        "https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage"
