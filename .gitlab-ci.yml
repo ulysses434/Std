@@ -7,6 +7,7 @@ stages:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   - test
 <<<<<<< HEAD
 include:
@@ -544,6 +545,11 @@ telegram-notification-full:
         "https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage"
 >>>>>>> 5d2bc85 (Finish)
 =======
+=======
+
+build_a:
+ stage: build
+>>>>>>> 155f387 (F3)
 include:
   - template: Security/SAST.gitlab-ci.yml
   - local: 'backend/.gitlab-ci-backend.yml'
