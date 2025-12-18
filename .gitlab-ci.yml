@@ -3,6 +3,9 @@ stages:
   - release
   - test
   - notify
+
+build_a:
+ stage: build
 include:
   - template: Security/SAST.gitlab-ci.yml
   - local: 'backend/.gitlab-ci-backend.yml'
