@@ -1,0 +1,37 @@
+build_b:
+  stage: build
+variables:
+  SONARQUBE_URL: "https://sonarqube.praktikum-services.ru"
+
+realease_a:
+  stage: release
+build-backend-code-job:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      when: always
+  script:
+    - echo "Starting backend build..."
+    - cd backend
+    - mvn package
+  artifacts:
+    name: "backend-$CI_COMMIT_REF_NAME"
+    paths:
+      - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
+    expire_in: 1 week
+
+release_b:  
+ stage: release
+sonarqube-backend-sast:
+  stage: test
+  image: maven:3.8-openjdk-16
+  rules:
+    - if: $CI_COMMIT_BRANCH
+  needs: ["build-backend-code-job"]
+  script: |
+    cd backend && mvn verify sonar:sonar \
+      -Dsonar.qualitygate.wait=true \
+      -Dsonar.projectKey=std-ext-028-45_Sausagestore_AZsiEu8gB0vRiJmVN7WG \
+      -Dsonar.host.url=$SONARQUBE_URL \
+      -Dsonar.login=058c12809bebb41825d79d611032f76a969c0117 \
+      -Dsonar.projectName"28-45_АлександровАлександр_Backend
