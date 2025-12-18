@@ -4,11 +4,12 @@ stages:
   - test
   - notify
 
-build_a:
- stage: build
- script:
-    - echo "Building a..."
 include:
   - template: Security/SAST.gitlab-ci.yml
   - local: 'backend/.gitlab-ci-backend.yml'
   - local: 'frontend/.gitlab-ci-frontend.yml'
+
+build_a:
+  stage: build
+  script:
+    - echo "Building a..."
