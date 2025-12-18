@@ -1,14 +1,11 @@
+variables:
+  SONARQUBE_URL: "https://sonarqube.praktikum-services.ru"
+
 build_b:
   stage: build
   script:
     - echo "Building b..."
-variables:
-  SONARQUBE_URL: "https://sonarqube.praktikum-services.ru"
 
-realease_a:
-  stage: release
-  script:
-    - echo "Releasing..."
 build-backend-code-job:
   stage: build
   rules:
@@ -24,10 +21,6 @@ build-backend-code-job:
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
     expire_in: 1 week
 
-release_b:  
- stage: release
- script:
-    - echo "Releasing..."
 sonarqube-backend-sast:
   stage: test
   image: maven:3.8-openjdk-16
@@ -40,4 +33,4 @@ sonarqube-backend-sast:
       -Dsonar.projectKey=std-ext-028-45_Sausagestore_AZsiEu8gB0vRiJmVN7WG \
       -Dsonar.host.url=$SONARQUBE_URL \
       -Dsonar.login=058c12809bebb41825d79d611032f76a969c0117 \
-      -Dsonar.projectName"28-45_АлександровАлександр_Backend
+      -Dsonar.projectName="28-45_АлександровАлександр_Backend"

@@ -547,6 +547,7 @@ telegram-notification-full:
 =======
 =======
 
+<<<<<<< HEAD
 build_a:
  stage: build
 <<<<<<< HEAD
@@ -555,8 +556,18 @@ build_a:
  script:
     - echo "Building a..."
 >>>>>>> 204c9a2 (F7)
+=======
+>>>>>>> ac01b43 (F8)
 include:
   - template: Security/SAST.gitlab-ci.yml
   - local: 'backend/.gitlab-ci-backend.yml'
   - local: 'frontend/.gitlab-ci-frontend.yml'
+<<<<<<< HEAD
 >>>>>>> c9aa23c (F1)
+=======
+
+build_a:
+  stage: build
+  script:
+    - echo "Building a..."
+>>>>>>> ac01b43 (F8)
