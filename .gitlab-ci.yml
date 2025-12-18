@@ -9,7 +9,12 @@ include:
   - local: 'backend/.gitlab-ci-backend.yml'
   - local: 'frontend/.gitlab-ci-frontend.yml'
 
-build_a:
-  stage: build
-  script:
-    - echo "Building a..."
+semgrep-sast:
+  stage: test
+  variables:
+    COMPILE: "false"
+    SAST_JAVA_VERSION: 11
+    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
+  cache:
+    paths:
+      - ${CI_PROJECT_DIR}/.m2/repository
