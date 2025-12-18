@@ -1,5 +1,7 @@
 build_b:
   stage: build
+  script:
+    - echo "Building b..."
 variables:
   SONARQUBE_URL: "https://sonarqube.praktikum-services.ru"
 
