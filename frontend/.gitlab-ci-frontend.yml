@@ -21,7 +21,7 @@ sonarqube-frontend-sast:
     - if: $CI_COMMIT_BRANCH
   script:
     - cd frontend
-    - sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY_FRONT -Dsonar.sources=. -Dsonar.host.url=$SONARQUBE_URL -Dsonar.login=$SONAR_LOGIN_FRONT -Dsonar.projectName="28-45_АлександровАлександр_Frontend"
+    - sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY_FRONT -Dsonar.sources=. -Dsonar.host.url=$SONARQUBE_URL -Dsonar.login=$SONAR_LOGIN_FRONT -Dsonar.projectName=$SONAR_PROJECT_NAME_FRONT
     
 telegram-notification-frontend:
   stage: notify
