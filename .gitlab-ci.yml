@@ -8,6 +8,7 @@ stages:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   - test
 <<<<<<< HEAD
 include:
@@ -558,10 +559,14 @@ build_a:
 >>>>>>> 204c9a2 (F7)
 =======
 >>>>>>> ac01b43 (F8)
+=======
+
+>>>>>>> 52febe130ec46098ec7602333fc01ccedb3211f8
 include:
   - template: Security/SAST.gitlab-ci.yml
   - local: 'backend/.gitlab-ci-backend.yml'
   - local: 'frontend/.gitlab-ci-frontend.yml'
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> c9aa23c (F1)
@@ -586,3 +591,5 @@ semgrep-sast:
 >>>>>>> 8d1f95a (V1)
 =======
 >>>>>>> e1f71e5 (V3)
+=======
+>>>>>>> 52febe130ec46098ec7602333fc01ccedb3211f8
