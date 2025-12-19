@@ -14,16 +14,6 @@ build-backend-code-job:
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
     expire_in: 1 week
 
-    semgrep-sast:
-  stage: test
-  variables:
-    COMPILE: "false"
-    SAST_JAVA_VERSION: 11
-    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
-  cache:
-    paths:
-      - ${CI_PROJECT_DIR}/.m2/repository
-
 sonarqube-backend-sast:
   stage: test
   image: maven:3.8-openjdk-16
@@ -37,6 +27,16 @@ sonarqube-backend-sast:
       -Dsonar.host.url=$SONARQUBE_URL \
       -Dsonar.login=$SONAR_LOGIN_BACK \
       -Dsonar.projectName=$SONAR_PROJECT_NAME_BACK \
+
+semgrep-sast:
+  stage: test
+  variables:
+    COMPILE: "false"
+    SAST_JAVA_VERSION: 11
+    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
+  cache:
+    paths:
+      - ${CI_PROJECT_DIR}/.m2/repository
         
 telegram-notification-backend:
   stage: notify
