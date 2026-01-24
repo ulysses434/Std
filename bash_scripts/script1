@@ -1,0 +1,51 @@
+#!/bin/bash
+
+h() { echo "Использование: $0 [--host|--user|--help]"; }
+
+host() {
+    echo " Информация о хосте "
+    
+    echo -e "\n[CPU Ядра]\n$(grep -c ^processor /proc/cpuinfo)"
+    
+    echo -e "\n[ОЗУ]"
+    gawk '/MemTotal/{t=$2}/MemFree/{f=$2}/Buffers/{b=$2}/^Cached/{c=$2}END{print "Всего:",int(t/1024)"MB\nИсп:",int((t-f-b-c)/1024)"MB"}' /proc/meminfo
+
+    echo -e "\n[ДИСКИ]"
+    df -h | gawk '/^\/dev\//{print $1,$2,$5,$6}' | while read d s a m; do
+        echo "$d ($m) Size:$s Free:$a"
+        st=$(grep "$(basename $d) " /proc/diskstats)
+        [ "$st" ] && gawk '{print "  Чт/Зап:",$4"/"$8,"Ошибки: N/A"}' <<< "$st"
+    done
+
+    echo -e "\n[LOAD]"; gawk '{print "1/5/15:",$1,$2,$3}' /proc/loadavg
+    echo -e "\n[ВРЕМЯ]"; date; uptime -p
+
+    echo -e "\n[СЕТЬ]"
+    gawk -F: '$1!~/lo/{split($2,a," "); print $1, a[2], a[3], a[9], a[10]}' /proc/net/dev | while read iface rxp rxerr txp txerr; do
+        iface=${iface// /} 
+        ip=$(ip -4 a s "$iface" 2>/dev/null | gawk '/inet/{print $2;exit}')
+        echo "Инт: $iface UP ${ip:-N/A}"
+        echo "  RX:$rxp($rxerr) TX:$txp($txerr)"
+    done
+
+    echo -e "\n[ПОРТЫ]"
+    ss -tuln | gawk '/LISTEN/{split($5,a,":");print "Порт:"a[length(a)]}'
+}
+
+usr() {
+    echo "Пользователи"
+    echo -e "\nВсе:"; gawk -F: '{print $1}' /etc/passwd
+    echo -e "\nRoots:"; gawk -F: '$3==0' /etc/passwd
+    who
+}
+
+[ $# -eq 0 ] && { h; exit 0; }
+eval set -- $(getopt -o '' -l host,user,help -n "$0" -- "$@")
+while true; do 
+    case "$1" in 
+        --host) host;; 
+        --user) usr;; 
+        --help) h;; 
+        --) break;; 
+    esac; shift; 
+done
