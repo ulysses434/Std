@@ -64,13 +64,7 @@ upload-backend-release:
     - build-backend-code-job
   script:
     - cd backend
-
-    - mvn clean package -DskipTests -Dversion.application=${VERSION}
-    
-    - ls -la target/
-    
     - >
-      curl -v -u "${NEXUS_REPO_USER}:${NEXUS_REPO_PASS}"
-      --upload-file target/sausage-store-${VERSION}.jar
-      "${NEXUS_REPO_URL}/${NEXUS_REPO_BACKEND_NAME}/com/yandex/practicum/devops/sausage-store/${VERSION}/sausage-store-${VERSION}.jar"
-    
+     mvn deploy -DskipTests
+     -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
+     -s settings.xml -Dversion.application=${VERSION} 
