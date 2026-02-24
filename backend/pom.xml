@@ -13,6 +13,15 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>sausage-store</name>
     <description>Backend for sausage-store</description>
+
+    <distributionManagement>
+  <repository>
+       <id>sausage-store</id>
+       <name>sausage-store</name>
+       <url>${env.NEXUS_REPO_URL}/repository/${env.NEXUS_REPO_BACKEND_NAME}</url>
+   </repository>
+</distributionManagement>
+  
     <properties>
         <java.version>16</java.version>
         <sonar.projectKey>test_manual</sonar.projectKey>
