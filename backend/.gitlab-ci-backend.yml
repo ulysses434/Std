@@ -58,6 +58,7 @@ upload-backend-release:
     - if: $CI_COMMIT_BRANCH
       changes:
         - backend/**/*
+      when: always   
   needs: ["build-backend-code-job"]
   script:
     - cd backend

@@ -43,6 +43,7 @@ upload-frontend-release:
   only:
     changes:
       - frontend/**/*
+    when: always  
   needs:
     - build-frontend-code-job
   script:
