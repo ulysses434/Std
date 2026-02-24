@@ -46,7 +46,6 @@ upload-frontend-release:
   needs:
     - build-frontend-code-job
   script:
-    - echo
     - cd frontend/dist
     - tar czvf sausage-store-${VERSION}.tar.gz frontend
     - >
