@@ -52,13 +52,19 @@ telegram-notification-backend:
         "https://api.telegram.org/bot--5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage"
 
 
+stages:
+  - release
+
 upload-backend-release:
   stage: release
-  rules:
-    - if: $CI_COMMIT_BRANCH
-      changes:
-        - backend/**/*  
-  needs: ["build-backend-code-job"]
+  only:
+    changes:
+      - backend/**/*
+  needs:
+    - build-backend-code-job
   script:
     - cd backend
-    - mvn deploy -DskipTests -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository -s ${CI_PROJECT_DIR}/settings.xml -Dversion.application=${VERSION}
+    - >
+     mvn deploy -DskipTests
+     -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
+     -s settings.xml -Dversion.application=${VERSION}
