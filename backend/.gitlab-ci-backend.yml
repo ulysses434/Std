@@ -64,7 +64,10 @@ upload-backend-release:
     - build-backend-code-job
   script:
     - cd backend
+    - rm -rf ${CI_PROJECT_DIR}/.m2/repository/com/yandex/practicum/devops/sausage-store/
+    - rm -rf ${CI_PROJECT_DIR}/.m2/repository/.cache/
     - >
-     mvn deploy -DskipTests
-     -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
-     -s settings.xml -Dversion.application=${VERSION}
+      mvn deploy -DskipTests
+      -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
+      -s settings.xml
+      -Dversion.application=${VERSION}
