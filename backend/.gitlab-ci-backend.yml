@@ -45,4 +45,18 @@ telegram-notification-backend:
       curl -X POST \
         -H 'Content-Type: application/json' \
         -d "{\"chat_id\": \"-1003263328596\", \"text\": \"Backend собран. Job: ${CI_JOB_NAME}. Branch: ${CI_COMMIT_REF_NAME}. Artifacts: ${ARTIFACT_URL}\"}" \
-        "https://api.telegram.org/bot5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage"
+        "https://api.telegram.org/bot--5933756043:AAG6cdxMAdOtN3-NQ9sfS4CdpGuS8ilASwA/sendMessage"
+
+upload-backend-release:
+  stage: release
+  only:
+    changes:
+      - backend/**/*
+  needs:
+    - build-backend-code-job
+  script:
+    - cd backend
+    - mvn deploy -DskipTests \
+      -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository \
+      -s ${CI_PROJECT_DIR}/settings.xml \
+      -Dversion.application=${VERSION}
