@@ -67,4 +67,4 @@ upload-backend-release:
     - >
       mvn deploy -DskipTests
       -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
-      -s ${CI_PROJECT_DIR}/settings.xml -Dversion.application=${VERSION}
+      -s ../settings.xml -Dversion.application=${VERSION}
