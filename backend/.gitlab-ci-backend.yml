@@ -54,14 +54,11 @@ telegram-notification-backend:
 
 upload-backend-release:
   stage: release
-  only:
-    changes:
-      - backend/**/*
-  needs:
-    - build-backend-code-job
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
+        - backend/**/*
+  needs: ["build-backend-code-job"]
   script:
     - cd backend
-    - mvn deploy -DskipTests \
-      -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository \
-      -s ${CI_PROJECT_DIR}/settings.xml \
-      -Dversion.application=${VERSION}
+    - mvn deploy -DskipTests -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository -s ${CI_PROJECT_DIR}/settings.xml -Dversion.application=${VERSION}
