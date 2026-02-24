@@ -8,3 +8,12 @@ include:
   - template: Security/SAST.gitlab-ci.yml
   - local: 'backend/.gitlab-ci-backend.yml'
   - local: 'frontend/.gitlab-ci-frontend.yml'
+
+variables:
+  VERSION: ${CI_COMMIT_REF_NAME}
+  MAVEN_OPTS: "-Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository"
+
+cache:
+  paths:
+    - ${CI_PROJECT_DIR}/.m2/repository 
+    - .npm/
