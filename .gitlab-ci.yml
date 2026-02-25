@@ -10,7 +10,7 @@ include:
   - local: 'frontend/.gitlab-ci-frontend.yml'
 
 variables:
-  VERSION: "1.0.${CI_PIPELINE_ID}"
+  VERSION: 0.0.${CI_PIPELINE_ID}
   MAVEN_OPTS: "-Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository"
 
 cache:
