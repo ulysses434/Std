@@ -3,7 +3,6 @@ stages:
   - test
   - release
   - notify
-  - trigger
   
 include:
   - template: Security/SAST.gitlab-ci.yml
@@ -26,7 +25,7 @@ frontend:
   stage: module-pipelines
   trigger:
     include:
-      - "/frontend/.gitlab-ci.yml"
+      - "frontend.gitlab-ci.yml"
     strategy: depend 
   only:
     changes: 
@@ -36,8 +35,8 @@ backend:
   stage: module-pipelines
   trigger:
     include:
-      - "/backend/.gitlab-ci.yml"
+      - "backend.gitlab-ci.yml"
     strategy: depend
   only:
-    changes:  
+    changes:
       - backend/**/*
