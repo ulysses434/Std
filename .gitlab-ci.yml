@@ -3,6 +3,7 @@ stages:
   - test
   - release
   - notify
+  - module-pipelines
   
 include:
   - template: Security/SAST.gitlab-ci.yml
@@ -17,9 +18,6 @@ cache:
   paths:
     - ${CI_PROJECT_DIR}/.m2/repository 
     - .npm/
-
-stages:
-  - module-pipelines
 
 frontend:
   stage: module-pipelines
