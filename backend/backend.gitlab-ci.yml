@@ -15,7 +15,6 @@ build:
    stage: build
    script:
       - cd backend
-      - mvn versions:set -DnewVersion=${VERSION}
       - >
          mvn package
          -Dversion.application=${VERSION}
