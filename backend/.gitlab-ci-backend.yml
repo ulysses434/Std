@@ -64,6 +64,7 @@ upload-backend-release:
     - build-backend-code-job
   script:
     - cd backend
+    - mvn versions:set -DnewVersion=${VERSION}
     - >
      mvn deploy -DskipTests
      -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
