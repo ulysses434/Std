@@ -22,11 +22,17 @@ build:
    rules: 
       - changes:
            - backend/**/*
+   artifacts:
+      paths:
+        - backend/target/*.jar
+      expire_in: 1 hour
 
 release:
    stage: release
    script:
       - cd backend
+      - mvn versions:set -DnewVersion=${VERSION}
+      
       - >
          mvn deploy -DskipTests -s settings.xml
          -Dversion.application=${VERSION}
