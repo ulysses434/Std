@@ -30,16 +30,6 @@ frontend:
     changes: 
       - frontend/**/*
 
-backend:
-  stage: module-pipelines
-  trigger:
-    include:
-      - "backend.gitlab-ci.yml"
-    strategy: depend
-  only:
-    changes:
-      - backend/**/*
-
 deploy:
   stage: deploy
   before_script:
