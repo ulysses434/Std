@@ -23,3 +23,14 @@ build:
       - changes:
            - backend/**/*
 
+release:
+   stage: release
+   script:
+      - cd backend
+      - >
+         mvn deploy -DskipTests -s settings.xml
+         -Dversion.application=${VERSION}
+         -Dmaven.repo.local=${MAVEN_REPO_PATH}
+   rules:
+      - changes:
+           - backend/**/*
