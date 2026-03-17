@@ -1,45 +1,24 @@
 stages:
-  - build
-  - test
-  - release
-  - notify
   - module-pipelines
-  - deploy
-  
-include:
-  - template: Security/SAST.gitlab-ci.yml
-  - local: 'backend/.gitlab-ci-backend.yml'
-  - local: 'frontend/.gitlab-ci-frontend.yml'
-
-variables:
-  VERSION: 0.0.${CI_PIPELINE_ID}
-  MAVEN_OPTS: "-Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository"
-
-cache:
-  paths:
-    - ${CI_PROJECT_DIR}/.m2/repository 
-    - .npm/
 
 frontend:
   stage: module-pipelines
   trigger:
     include:
-      - "frontend.gitlab-ci.yml"
-    strategy: depend 
+      - "frontend/.gitlab-ci-frontend.yml"
+    strategy: depend
   only:
-    changes: 
+    changes:
       - frontend/**/*
 
-deploy:
-  stage: deploy
-  before_script:
-    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
-  script:
-    - scp ./backend/sausage-store-backend.service ${DEV_USER}@${DEV_HOST}:/home/${DEV_USER}/sausage-store-backend.service
-    - ssh ${DEV_USER}@${DEV_HOST} "export "CURRENT_VERSION=${VERSION}"; export "VERSION=${VERSION}"; export "DEV_HOST=${DEV_HOST}";export "NEXUS_REPO_URL=${NEXUS_REPO_URL}"; export "NEXUS_REPO_USER=${NEXUS_REPO_USER}"; export "NEXUS_REPO_PASS=${NEXUS_REPO_PASS}";setsid /bin/bash -s " < ./backend/deploy.sh 
+
+backend:
+  stage: module-pipelines
+  trigger:
+    include:
+      - "backend/.gitlab-ci-backend.yml"
+    strategy: depend
+  only:
+    changes:
+      - backend/**/*
+
