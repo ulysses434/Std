@@ -21,8 +21,7 @@ build-frontend-code-job:
     expire_in: 1 week
   cache:
     paths:
-    - ~/.npm
-
+      - frontend/node_modules/
 
 sonarqube-frontend-sast:
   stage: test
