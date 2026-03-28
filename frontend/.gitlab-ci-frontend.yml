@@ -19,8 +19,8 @@ build-frontend-code-job:
     paths:
       - frontend/dist/
     expire_in: 1 week
-    cache:
-  paths:
+  cache:
+    paths:
     - ~/.npm
 
 
