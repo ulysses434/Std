@@ -5,10 +5,6 @@ stages:
   - notify
   - deploy
 
-cache:
-  paths:
-    - ~/.npm
-
 build-frontend-code-job:
   stage: build
   rules:
@@ -23,6 +19,10 @@ build-frontend-code-job:
     paths:
       - frontend/dist/
     expire_in: 1 week
+    cache:
+  paths:
+    - ~/.npm
+
 
 sonarqube-frontend-sast:
   stage: test
