@@ -57,6 +57,8 @@ upload-frontend-release:
   needs: ["build-frontend-code-job"]
   script:
     - cd frontend
+    - export VERSION=$(node -p "require('./package.json').version")
+    - echo "Building archive for version $VERSION"
     - tar czvf sausage-store-${VERSION}.tar.gz dist/
     - |
       curl -v -u "${NEXUS_REPO_USER}:${NEXUS_REPO_PASS}" \
