@@ -7,7 +7,7 @@ stages:
 
 cache:
   paths:
-    - .npm/
+    - ~/.npm
 
 build-frontend-code-job:
   stage: build
