@@ -61,8 +61,8 @@ upload-frontend-release:
     - tar czvf sausage-store-${VERSION}.tar.gz dist/
     - |
       curl -v -u "${NEXUS_REPO_USER}:${NEXUS_REPO_PASS}" \
-    --upload-file sausage-store-${VERSION}.tar.gz \
-    "${NEXUS_REPO_URL}/repository/${NEXUS_REPO_FRONTEND_NAME}/${VERSION}/sausage-store-${VERSION}.tar.gz"
+        --upload-file sausage-store-${VERSION}.tar.gz \
+        "${NEXUS_REPO_URL}/repository/${NEXUS_REPO_FRONTEND_NAME}/${VERSION}/sausage-store-${VERSION}.tar.gz"
 
 deploy:
   stage: deploy
