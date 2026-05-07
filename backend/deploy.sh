@@ -1,9 +1,19 @@
-#! /bin/bash
+#!/bin/bash
 set -xe
-sudo cp -rf sausage-store-backend.service /etc/systemd/system/sausage-store-backend.service
-sudo rm -f /home/jarservice/sausage-store.jar || true
-sudo rm -f /opt/sausage-store/bin/sausage-store-0.0.1-SNAPSHOT.jar || true
-curl -L -u ${NEXUS_REPO_USER}:${NEXUS_REPO_PASS} -o sausage-store.jar ${NEXUS_REPO_URL}/com/yandex/practicum/devops/sausage-store/${VERSION}/sausage-store-${VERSION}.jar
-sudo cp ./sausage-store.jar /opt/sausage-store/bin/sausage-store-0.0.1-SNAPSHOT.jar
-sudo systemctl daemon-reload
-sudo systemctl restart sausage-store-backend.service
+
+echo "${CI_REGISTRY_PASSWORD}" | sudo docker login -u "${CI_REGISTRY_USER}" --password-stdin "${CI_REGISTRY}"
+
+sudo docker network create -d bridge sausage_network || true
+
+sudo docker rm -f sausage-backend || true
+
+sudo docker run -d --name sausage-backend \
+     --restart=always \
+     --network=sausage_network \
+     -e SPRING_DATASOURCE_URL="${SPRING_DATASOURCE_URL}" \
+     -e SPRING_DATASOURCE_USERNAME="${SPRING_DATASOURCE_USERNAME}" \
+     -e SPRING_DATASOURCE_PASSWORD="${SPRING_DATASOURCE_PASSWORD}" \
+     -e SPRING_DATA_MONGODB_URI="${SPRING_DATA_MONGODB_URI}" \
+     -v /home/student/.postgresql/root.crt:/app/postgres.crt:ro \
+     -v /home/student/.mongodb/root.crt:/app/root.crt:ro \
+     "${CI_REGISTRY_IMAGE}"/sausage-backend:${VERSION}

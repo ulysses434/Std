@@ -16,6 +16,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource; // <--- ЭТОТ ИМПОРТ НУЖЕН
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
@@ -27,6 +28,15 @@ import static org.hamcrest.Matchers.hasProperty;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { SausageApplication.class }, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource(properties = { 
+    "spring.datasource.url=jdbc:h2:mem:testdb",
+    "spring.datasource.driverClassName=org.h2.Driver",
+    "spring.datasource.username=sa",
+    "spring.datasource.password=password",
+    "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+    "spring.jpa.hibernate.ddl-auto=create-drop",
+    "spring.flyway.enabled=false"
+})
 public class SausageApplicationIntegrationTest {
 
     @Autowired private TestRestTemplate restTemplate;
