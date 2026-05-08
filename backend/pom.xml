@@ -5,8 +5,8 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.0</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>2.6.2</version>
+        <relativePath/>
     </parent>
     <groupId>com.yandex.practicum.devops</groupId>
     <artifactId>sausage-store</artifactId>
@@ -14,12 +14,12 @@
     <name>sausage-store</name>
     <description>Backend for sausage-store</description>
 
-            <distributionManagement>
-    <repository>
-        <id>sausage-store</id>
-        <url>https://nexus.praktikum-services.tech/repository/28-45-backend/</url>
-    </repository>
-</distributionManagement>
+    <distributionManagement>
+        <repository>
+            <id>sausage-store</id>
+            <url>https://nexus.praktikum-services.tech/repository/28-45-backend/</url>
+        </repository>
+    </distributionManagement>
 
     <properties>
         <java.version>16</java.version>
@@ -30,7 +30,20 @@
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>
         <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
+        <spring-cloud.version>2021.0.0</spring-cloud.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -98,9 +111,14 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
-        </dependencies>
+        <!-- Vault integration -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-vault-config</artifactId>
+        </dependency>
+    </dependencies>
 
-            <build>
+    <build>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
