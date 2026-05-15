@@ -39,11 +39,7 @@ deploy-backend:
   stage: deploy
   image: docker:24.0.5
   before_script:
-  - apk add --no-cache openssh-client bash curl unzip
-  - curl -fsSL https://github.com/hashicorp/vault/releases/download/v1.11.3/vault_1.11.3_linux_amd64.zip -o /tmp/vault.zip
-  - unzip -o /tmp/vault.zip -d /usr/local/bin/
-  - chmod +x /usr/local/bin/vault
-  - rm /tmp/vault.zip
+  - apk add --no-cache openssh-client bash vault
   - eval $(ssh-agent -s)
   - echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
   - mkdir -p ~/.ssh && chmod 700 ~/.ssh
