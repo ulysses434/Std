@@ -54,14 +54,14 @@ deploy-backend-report:
     - apk add --no-cache openssh-client bash
     - eval $(ssh-agent -s)
     - echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo "${SSH_KNOWN_HOSTS}" >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - echo "${SSH_KNOWN_HOSTS}" >> ~/.ssh/known_hosts && chmod 644 ~/.ssh/known_hosts
     - docker context create remote --docker "host=ssh://${DEV_USER}@${DEV_HOST}"
     - docker context use remote
     - echo "${CI_REGISTRY_PASSWORD}" | docker login -u "${CI_REGISTRY_USER}" --password-stdin ${CI_REGISTRY}
   script:
-    - docker compose up -d backend-report
+    - export VERSION=${VERSION}
+    - export REPORTS_MONGODB_URI=${REPORTS_MONGODB_URI}
+    - docker-compose up -d backend-report
   rules:
     - if: $CI_COMMIT_BRANCH == "microservices"

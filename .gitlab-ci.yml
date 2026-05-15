@@ -22,7 +22,7 @@ backend:
 backend-report:
   stage: module-pipelines
   trigger:
-    include: "backend/backend-report.gitlab-ci.yml"
+    include: "backend-report/backend-report.gitlab-ci.yml"
     strategy: depend
   only:
     changes:
