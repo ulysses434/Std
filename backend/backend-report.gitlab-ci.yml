@@ -14,13 +14,12 @@ test:
   stage: test
   image: python:3.11-alpine
   before_script:
-    - cd ${CI_PROJECT_DIR}/backend-report/app
+    - cd ${CI_PROJECT_DIR}/backend-report
     - pip install -r requirements.txt
   script:
     - python -m unittest
   rules:
     - if: $CI_COMMIT_BRANCH == "microservices"
-
 build:
   stage: build
   image:
