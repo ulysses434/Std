@@ -14,7 +14,7 @@ test:
   stage: test
   image: python:3.11-alpine
   before_script:
-    - cd ${CI_PROJECT_DIR}/backend-report/app.py
+    - cd ${CI_PROJECT_DIR}/backend-report/app
     - pip install -r requirements.txt
   script:
     - python -m unittest
