@@ -15,7 +15,7 @@ build:
     - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64)\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor
         --context "${CI_PROJECT_DIR}/backend"
-        --dockerfile "${CI_PROJECT_DIR}/backend/DockerFile"
+        --dockerfile "${CI_PROJECT_DIR}/backend/Dockerfile"
         --destination "${CI_REGISTRY_IMAGE}/sausage-store/backend:${CI_COMMIT_SHA}"
         --build-arg VERSION=$VERSION
         --cache=true
@@ -37,7 +37,7 @@ release:
 
 deploy-backend:
   stage: deploy
-  image: docker/compose:alpine-1.29.2
+  image: docker:24.0.5
   before_script:
     - apk add --no-cache openssh-client bash
     - eval $(ssh-agent -s)
@@ -55,6 +55,6 @@ deploy-backend:
     - export SPRING_DATASOURCE_PORT=${SPRING_DATASOURCE_PORT}
     - export SPRING_DATASOURCE_DATABASE=${SPRING_DATASOURCE_DATABASE}
     - export REPORTS_MONGODB_URI=${REPORTS_MONGODB_URI}
-    - docker-compose up -d backend
+    - docker compose up -d backend
   rules:
     - if: $CI_COMMIT_BRANCH == "microservices"

@@ -20,6 +20,7 @@ test:
     - python -m unittest
   rules:
     - if: $CI_COMMIT_BRANCH == "microservices"
+
 build:
   stage: build
   image:
@@ -49,7 +50,7 @@ release:
 
 deploy-backend-report:
   stage: deploy
-  image: docker/compose:alpine-1.29.2
+  image: docker:24.0.5
   before_script:
     - apk add --no-cache openssh-client bash
     - eval $(ssh-agent -s)
@@ -62,6 +63,6 @@ deploy-backend-report:
   script:
     - export VERSION=${VERSION}
     - export REPORTS_MONGODB_URI=${REPORTS_MONGODB_URI}
-    - docker-compose up -d backend-report
+    - docker compose up -d backend-report
   rules:
     - if: $CI_COMMIT_BRANCH == "microservices"
