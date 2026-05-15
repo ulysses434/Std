@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  backend:
+    image: ${CI_REGISTRY_IMAGE}/sausage-store/backend:${VERSION}
+    container_name: sausage-store-backend
+    environment:
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${SPRING_DATASOURCE_HOST}:${SPRING_DATASOURCE_PORT}/${SPRING_DATASOURCE_DATABASE}
+      SPRING_DATA_MONGODB_URI: ${REPORTS_MONGODB_URI}
+    networks:
+      - sausage-store
+
+  backend-report:
+    build:
+      context: ./backend-report
+      dockerfile: Dockerfile
+    image: ${CI_REGISTRY_IMAGE}/sausage-store/backend-report:${VERSION}
+    container_name: sausage-store-backend-report
+    environment:
+      PORT: "8080"
+      DB: ${REPORTS_MONGODB_URI}
+    networks:
+      - sausage-store
+
+  frontend:
+    image: ${CI_REGISTRY_IMAGE}/sausage-frontend:${VERSION}
+    container_name: sausage-store-frontend
+    ports:
+      - "80:80"
+    networks:
+      - sausage-store
+
+networks:
+  sausage-store:
+    driver: bridge
