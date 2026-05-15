@@ -63,6 +63,7 @@ deploy-backend-report:
   script:
     - export VERSION=${VERSION}
     - export REPORTS_MONGODB_URI=${REPORTS_MONGODB_URI}
+    - docker compose down
     - docker compose up -d backend-report
   rules:
     - if: $CI_COMMIT_BRANCH == "microservices"

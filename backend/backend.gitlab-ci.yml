@@ -55,6 +55,7 @@ deploy-backend:
     - export SPRING_DATASOURCE_PORT=${SPRING_DATASOURCE_PORT}
     - export SPRING_DATASOURCE_DATABASE=${SPRING_DATASOURCE_DATABASE}
     - export REPORTS_MONGODB_URI=${REPORTS_MONGODB_URI}
+    - docker compose down
     - docker compose up -d backend
   rules:
     - if: $CI_COMMIT_BRANCH == "microservices"
