@@ -3,7 +3,6 @@ version: "3.8"
 services:
   backend:
     image: ${CI_REGISTRY_IMAGE}/sausage-store/backend:${VERSION}
-    container_name: sausage-store-backend
     environment:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
@@ -13,6 +12,8 @@ services:
       SPRING_CLOUD_VAULT_PORT: "8200"
       SPRING_CLOUD_VAULT_SCHEME: http
       SPRING_CLOUD_VAULT_TOKEN: ${VAULT_TOKEN}
+      VIRTUAL_HOST: "backend"
+      VIRTUAL_PORT: "8080"
     volumes:
       - /opt/certs/CA.pem:/app/postgres.crt:ro
       - /opt/certs/CA.pem:/app/root.crt:ro
@@ -36,8 +37,15 @@ services:
       - sausage-store
 
   frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     image: ${CI_REGISTRY_IMAGE}/sausage-frontend:${VERSION}
     container_name: sausage-store-frontend
+    environment:
+      DEFAULT_HOST: "backend"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
     ports:
       - "80:80"
     networks:
