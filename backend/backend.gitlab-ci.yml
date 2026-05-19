@@ -35,11 +35,11 @@ release:
   rules:
     - if: $CI_COMMIT_BRANCH == "microservices"
 
-deploy-backend:
+eploy-backend:
   stage: deploy
   image: docker:24.0.5
   before_script:
-    - apk add --no-cache openssh-client bash vault
+    - apk add --no-cache openssh-client bash vault curl
     - eval $(ssh-agent -s)
     - echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
@@ -55,8 +55,6 @@ deploy-backend:
     - export REPORTS_MONGODB_URI="$(vault kv get -field=spring.data.mongodb.uri secret/sausage-store)"
     - export VERSION=${VERSION}
     - export CI_REGISTRY_IMAGE=${CI_REGISTRY_IMAGE}
-    - docker rm -f $(docker ps -aq --filter "name=sausagestore_backend") 2>/dev/null || true
-    - docker compose down --remove-orphans 2>/dev/null || true
-    - docker compose up -d --scale backend=3 --force-recreate --remove-orphans
+    - bash ./backend/deploy-blue-green.sh
   rules:
     - if: $CI_COMMIT_BRANCH == "microservices"
