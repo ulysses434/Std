@@ -32,15 +32,16 @@ docker run -d \
     -e SPRING_DATASOURCE_USERNAME="${SPRING_DATASOURCE_USERNAME}" \
     -e SPRING_DATASOURCE_PASSWORD="${SPRING_DATASOURCE_PASSWORD}" \
     -e SPRING_DATA_MONGODB_URI="${REPORTS_MONGODB_URI}" \
-    -e VIRTUAL_HOST="backend" \
-    -e VIRTUAL_PORT="8080" \
+    -e SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=5 \
+    -e VIRTUAL_HOST=backend \
+    -e VIRTUAL_PORT=8080 \
     -v /opt/certs/CA.pem:/app/postgres.crt:ro \
     -v /opt/certs/CA.pem:/app/root.crt:ro \
     --add-host=host.docker.internal:host-gateway \
     --health-cmd="curl --fail -s http://localhost:8080/actuator/health" \
     --health-interval=10s \
     --health-timeout=5s \
-    --health-start-period=30s \
+    --health-start-period=90s \
     --health-retries=5 \
     "${CI_REGISTRY_IMAGE}/sausage-store/backend:${VERSION}"
 
@@ -60,6 +61,7 @@ if [ $HEALTHY -eq 0 ]; then
     echo "ОШИБКА: новый контейнер не стал healthy за 180 секунд. Логи контейнера:"
     docker logs "${NEW_COLOR}"
     docker stop "${NEW_COLOR}" 2>/dev/null || true
+    docker rm "${NEW_COLOR}" 2>/dev/null || true
     exit 1
 fi
 

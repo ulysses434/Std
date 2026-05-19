@@ -7,6 +7,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_DATA_MONGODB_URI: ${REPORTS_MONGODB_URI}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "5"
       VIRTUAL_HOST: "backend"
       VIRTUAL_PORT: "8080"
     volumes:
@@ -20,7 +21,7 @@ services:
       test: ["CMD", "curl", "--fail", "-s", "http://localhost:8080/actuator/health"]
       interval: 10s
       timeout: 5s
-      start_period: 60s
+      start_period: 90s
       retries: 5
     restart: unless-stopped
 
@@ -32,6 +33,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_DATA_MONGODB_URI: ${REPORTS_MONGODB_URI}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "5"
       VIRTUAL_HOST: "backend"
       VIRTUAL_PORT: "8080"
     volumes:
@@ -45,7 +47,7 @@ services:
       test: ["CMD", "curl", "--fail", "-s", "http://localhost:8080/actuator/health"]
       interval: 10s
       timeout: 5s
-      start_period: 60s
+      start_period: 90s
       retries: 5
     restart: unless-stopped
 
