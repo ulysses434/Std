@@ -21,11 +21,11 @@ fi
 
 echo "Активный цвет: $ACTIVE_COLOR, новый цвет: $NEW_COLOR"
 
-docker stop "${NEW_COLOR}-container" 2>/dev/null || true
-docker rm "${NEW_COLOR}-container" 2>/dev/null || true
+docker stop "${NEW_COLOR}" 2>/dev/null || true
+docker rm "${NEW_COLOR}" 2>/dev/null || true
 
 docker run -d \
-    --name "${NEW_COLOR}-container" \
+    --name "${NEW_COLOR}" \
     --network sausagestore_sausage-store \
     --restart unless-stopped \
     -e SPRING_DATASOURCE_URL="${SPRING_DATASOURCE_URL}" \
@@ -44,27 +44,28 @@ docker run -d \
     --health-retries=5 \
     "${CI_REGISTRY_IMAGE}/sausage-store/backend:${VERSION}"
 
-echo "Ожидание, пока новый контейнер станет healthy..."
-
-for i in $(seq 1 24); do
-    STATUS=$(docker inspect --format='{{.State.Health.Status}}' "${NEW_COLOR}-container" 2>/dev/null)
+echo "Ожидание, пока новый контейнер станет healthy (до 180 секунд)..."
+HEALTHY=0
+for i in $(seq 1 36); do
+    STATUS=$(docker inspect --format='{{.State.Health.Status}}' "${NEW_COLOR}" 2>/dev/null)
     if [ "$STATUS" == "healthy" ]; then
         echo "Новый контейнер $NEW_COLOR здоров."
+        HEALTHY=1
         break
     fi
     sleep 5
 done
 
-if [ "$STATUS" != "healthy" ]; then
-    echo "ОШИБКА: новый контейнер не стал healthy. Откат."
-    docker stop "${NEW_COLOR}-container" || true
+if [ $HEALTHY -eq 0 ]; then
+    echo "ОШИБКА: новый контейнер не стал healthy за 180 секунд. Логи контейнера:"
+    docker logs "${NEW_COLOR}"
+    docker stop "${NEW_COLOR}" 2>/dev/null || true
     exit 1
 fi
 
-# Останавливаем старый контейнер
 if [ -n "$OLD_COLOR" ]; then
-    docker stop "${OLD_COLOR}-container" 2>/dev/null || true
-    docker rm "${OLD_COLOR}-container" 2>/dev/null || true
+    docker stop "${OLD_COLOR}" 2>/dev/null || true
+    docker rm "${OLD_COLOR}" 2>/dev/null || true
     echo "Старый контейнер $OLD_COLOR остановлен."
 fi
 

@@ -20,7 +20,7 @@ services:
       test: ["CMD", "curl", "--fail", "-s", "http://localhost:8080/actuator/health"]
       interval: 10s
       timeout: 5s
-      start_period: 30s
+      start_period: 60s
       retries: 5
     restart: unless-stopped
 
@@ -45,10 +45,40 @@ services:
       test: ["CMD", "curl", "--fail", "-s", "http://localhost:8080/actuator/health"]
       interval: 10s
       timeout: 5s
-      start_period: 30s
+      start_period: 60s
       retries: 5
     restart: unless-stopped
 
   backend-report:
-  
+    build:
+      context: ./backend-report
+      dockerfile: Dockerfile
+    image: ${CI_REGISTRY_IMAGE}/sausage-store/backend-report:${VERSION}
+    container_name: sausage-store-backend-report
+    environment:
+      PORT: "8080"
+      DB: ${REPORTS_MONGODB_URI}
+    volumes:
+      - /opt/certs/CA.pem:/app/root.crt:ro
+    networks:
+      - sausage-store
+
   frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: ${CI_REGISTRY_IMAGE}/sausage-frontend:${VERSION}
+    container_name: sausage-store-frontend
+    environment:
+      DOCKER_HOST: "unix:///tmp/docker.sock"
+      DEFAULT_HOST: "backend"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    ports:
+      - "80:80"
+    networks:
+      - sausage-store
+
+networks:
+  sausage-store:
+    driver: bridge
