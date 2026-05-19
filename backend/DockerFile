@@ -7,7 +7,7 @@ RUN wget -O  YandexInternalRootCA.crt https://storage.yandexcloud.net/cloud-cert
     && mvn package -Dversion.application=${VERSION} -Dmaven.test.skip=true \
     && mv target/*.jar target/app.jar
 FROM bellsoft/liberica-runtime-container:jre-17-slim-musl
-RUN apk add --no-cache curl   # <-- устанавливаем curl для healthcheck
+RUN apk add --no-cache curl
 WORKDIR /app
 COPY --from=builder /usr/src/app/YandexInternalRootCA.crt .
 RUN keytool -importcert -file YandexInternalRootCA.crt \
