@@ -21,6 +21,11 @@ fi
 
 echo "Активный цвет: $ACTIVE_COLOR, новый цвет: $NEW_COLOR"
 
+if [ -n "$OLD_COLOR" ]; then
+    echo "Останавливаю старый контейнер $OLD_COLOR, чтобы освободить соединения с БД"
+    docker stop "${OLD_COLOR}" 2>/dev/null || true
+fi
+
 docker stop "${NEW_COLOR}" 2>/dev/null || true
 docker rm "${NEW_COLOR}" 2>/dev/null || true
 
@@ -58,17 +63,22 @@ for i in $(seq 1 36); do
 done
 
 if [ $HEALTHY -eq 0 ]; then
-    echo "ОШИБКА: новый контейнер не стал healthy за 180 секунд. Логи контейнера:"
+    echo "ОШИБКА: новый контейнер не стал healthy за 180 секунд."
+    echo "Логи нового контейнера:"
     docker logs "${NEW_COLOR}"
     docker stop "${NEW_COLOR}" 2>/dev/null || true
     docker rm "${NEW_COLOR}" 2>/dev/null || true
+
+    if [ -n "$OLD_COLOR" ]; then
+        echo "Возвращаю старый контейнер $OLD_COLOR"
+        docker start "${OLD_COLOR}"
+    fi
     exit 1
 fi
 
 if [ -n "$OLD_COLOR" ]; then
-    docker stop "${OLD_COLOR}" 2>/dev/null || true
     docker rm "${OLD_COLOR}" 2>/dev/null || true
-    echo "Старый контейнер $OLD_COLOR остановлен."
+    echo "Старый контейнер $OLD_COLOR удалён."
 fi
 
 echo "Blue-green деплой завершён. Трафик переключён на $NEW_COLOR."
