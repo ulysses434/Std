@@ -21,14 +21,17 @@ fi
 
 echo "Активный цвет: $ACTIVE_COLOR, новый цвет: $NEW_COLOR"
 
+# Останавливаем старый контейнер, чтобы освободить соединения с БД
 if [ -n "$OLD_COLOR" ]; then
-    echo "Останавливаю старый контейнер $OLD_COLOR, чтобы освободить соединения с БД"
+    echo "Останавливаю старый контейнер $OLD_COLOR..."
     docker stop "${OLD_COLOR}" 2>/dev/null || true
 fi
 
+# Удаляем возможно оставшийся новый контейнер
 docker stop "${NEW_COLOR}" 2>/dev/null || true
 docker rm "${NEW_COLOR}" 2>/dev/null || true
 
+# Запускаем новый
 docker run -d \
     --name "${NEW_COLOR}" \
     --network sausagestore_sausage-store \
@@ -37,7 +40,7 @@ docker run -d \
     -e SPRING_DATASOURCE_USERNAME="${SPRING_DATASOURCE_USERNAME}" \
     -e SPRING_DATASOURCE_PASSWORD="${SPRING_DATASOURCE_PASSWORD}" \
     -e SPRING_DATA_MONGODB_URI="${REPORTS_MONGODB_URI}" \
-    -e SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=5 \
+    -e SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=3 \
     -e VIRTUAL_HOST=backend \
     -e VIRTUAL_PORT=8080 \
     -v /opt/certs/CA.pem:/app/postgres.crt:ro \
@@ -46,7 +49,7 @@ docker run -d \
     --health-cmd="curl --fail -s http://localhost:8080/actuator/health" \
     --health-interval=10s \
     --health-timeout=5s \
-    --health-start-period=90s \
+    --health-start-period=120s \
     --health-retries=5 \
     "${CI_REGISTRY_IMAGE}/sausage-store/backend:${VERSION}"
 
@@ -63,7 +66,7 @@ for i in $(seq 1 36); do
 done
 
 if [ $HEALTHY -eq 0 ]; then
-    echo "ОШИБКА: новый контейнер не стал healthy за 180 секунд."
+    echo "ОШИБКА: новый контейнер не стал healthy."
     echo "Логи нового контейнера:"
     docker logs "${NEW_COLOR}"
     docker stop "${NEW_COLOR}" 2>/dev/null || true
