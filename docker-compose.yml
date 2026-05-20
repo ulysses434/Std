@@ -1,0 +1,86 @@
+services:
+  backend-blue:
+    image: ${CI_REGISTRY_IMAGE}/sausage-store/backend:${VERSION}
+    container_name: backend-blue
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATA_MONGODB_URI: ${REPORTS_MONGODB_URI}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "5"
+      VIRTUAL_HOST: "backend"
+      VIRTUAL_PORT: "8080"
+    volumes:
+      - /opt/certs/CA.pem:/app/postgres.crt:ro
+      - /opt/certs/CA.pem:/app/root.crt:ro
+    networks:
+      - sausage-store
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "-s", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      start_period: 90s
+      retries: 5
+    restart: unless-stopped
+
+  backend-green:
+    image: ${CI_REGISTRY_IMAGE}/sausage-store/backend:${VERSION}
+    container_name: backend-green
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATA_MONGODB_URI: ${REPORTS_MONGODB_URI}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "5"
+      VIRTUAL_HOST: "backend"
+      VIRTUAL_PORT: "8080"
+    volumes:
+      - /opt/certs/CA.pem:/app/postgres.crt:ro
+      - /opt/certs/CA.pem:/app/root.crt:ro
+    networks:
+      - sausage-store
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "-s", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      start_period: 90s
+      retries: 5
+    restart: unless-stopped
+
+  backend-report:
+    build:
+      context: ./backend-report
+      dockerfile: Dockerfile
+    image: ${CI_REGISTRY_IMAGE}/sausage-store/backend-report:${VERSION}
+    container_name: sausage-store-backend-report
+    environment:
+      PORT: "8080"
+      DB: ${REPORTS_MONGODB_URI}
+    volumes:
+      - /opt/certs/CA.pem:/app/root.crt:ro
+    networks:
+      - sausage-store
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: ${CI_REGISTRY_IMAGE}/sausage-frontend:${VERSION}
+    container_name: sausage-store-frontend
+    environment:
+      DOCKER_HOST: "unix:///tmp/docker.sock"
+      DEFAULT_HOST: "backend"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    ports:
+      - "80:80"
+    networks:
+      - sausage-store
+
+networks:
+  sausage-store:
+    driver: bridge
