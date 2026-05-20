@@ -19,7 +19,7 @@ build:
         --dockerfile "${CI_PROJECT_DIR}/frontend/Dockerfile"
         --destination "${CI_REGISTRY_IMAGE}/sausage-frontend:${CI_COMMIT_SHA}"
   rules:
-    - if: $CI_COMMIT_BRANCH == "microservices"
+    - if: $CI_COMMIT_BRANCH == "main"
 
 release:
   stage: release

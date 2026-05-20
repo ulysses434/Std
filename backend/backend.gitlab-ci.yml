@@ -20,7 +20,7 @@ build:
         --build-arg VERSION=$VERSION
         --cache=true
   rules:
-    - if: $CI_COMMIT_BRANCH == "microservices"
+    - if: $CI_COMMIT_BRANCH == "main"
 
 release:
   stage: release

@@ -19,7 +19,7 @@ test:
   script:
     - python -m unittest
   rules:
-    - if: $CI_COMMIT_BRANCH == "microservices"
+    - if: $CI_COMMIT_BRANCH == "main"
 
 build:
   stage: build
