@@ -34,7 +34,7 @@ build:
         --dockerfile "${CI_PROJECT_DIR}/backend-report/Dockerfile"
         --destination "${CI_REGISTRY_IMAGE}/sausage-store/backend-report:${CI_COMMIT_SHA}"
   rules:
-    - if: $CI_COMMIT_BRANCH == "microservices"
+    - if: $CI_COMMIT_BRANCH == "main"
 
 release:
   stage: release
@@ -46,7 +46,7 @@ release:
   script:
     - crane tag ${CI_REGISTRY_IMAGE}/sausage-store/backend-report:${CI_COMMIT_SHA} ${VERSION}
   rules:
-    - if: $CI_COMMIT_BRANCH == "microservices"
+    - if: $CI_COMMIT_BRANCH == "main"
 
 deploy-backend-report:
   stage: deploy
@@ -68,4 +68,4 @@ deploy-backend-report:
   - docker rm -f sausage-store-backend-report 2>/dev/null || true
   - docker compose up -d --force-recreate backend-report
   rules:
-    - if: $CI_COMMIT_BRANCH == "microservices"
+    - if: $CI_COMMIT_BRANCH == "main"

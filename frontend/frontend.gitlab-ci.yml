@@ -33,7 +33,7 @@ release:
     - crane tag $CI_REGISTRY_IMAGE/sausage-frontend:$CI_COMMIT_SHA $VERSION
     - crane tag $CI_REGISTRY_IMAGE/sausage-frontend:$CI_COMMIT_SHA latest
   rules:
-    - if: $CI_COMMIT_BRANCH == "microservices"
+    - if: $CI_COMMIT_BRANCH == "main"
 
 deploy-frontend:
   stage: deploy
@@ -52,4 +52,4 @@ deploy-frontend:
   - docker rm -f sausage-store-frontend 2>/dev/null || true
   - docker compose up -d --force-recreate frontend
   rules:
-    - if: $CI_COMMIT_BRANCH == "microservices"
+    - if: $CI_COMMIT_BRANCH == "main"

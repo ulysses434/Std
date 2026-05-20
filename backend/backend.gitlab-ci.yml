@@ -33,7 +33,7 @@ release:
   script:
     - crane tag $CI_REGISTRY_IMAGE/sausage-store/backend:$CI_COMMIT_SHA $VERSION
   rules:
-    - if: $CI_COMMIT_BRANCH == "microservices"
+    - if: $CI_COMMIT_BRANCH == "main"
 
 deploy-backend:
   stage: deploy
@@ -57,4 +57,4 @@ deploy-backend:
     - export CI_REGISTRY_IMAGE=${CI_REGISTRY_IMAGE}
     - bash ./backend/deploy-blue-green.sh
   rules:
-    - if: $CI_COMMIT_BRANCH == "microservices"
+    - if: $CI_COMMIT_BRANCH == "main"
