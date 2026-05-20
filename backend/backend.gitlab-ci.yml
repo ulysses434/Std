@@ -35,7 +35,7 @@ release:
   rules:
     - if: $CI_COMMIT_BRANCH == "microservices"
 
-eploy-backend:
+deploy-backend:
   stage: deploy
   image: docker:24.0.5
   before_script:
