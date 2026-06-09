@@ -35,19 +35,22 @@ deploy-kubernetes:
   before_script:
     - mkdir -p ~/.kube
     - echo "${KUBECONFIG_DATA}" | base64 -d > ~/.kube/config
+    - export KUBECONFIG=~/.kube/config
+    - unset KUBERNETES_SERVICE_HOST KUBERNETES_SERVICE_PORT
+    - kubectl config view
   script:
-    - kubectl --kubeconfig ~/.kube/config apply -f kubernetes/backend/secrets.yaml -n std-ext-028-45
-    - kubectl --kubeconfig ~/.kube/config apply -f kubernetes/backend/configmap.yaml -n std-ext-028-45
-    - kubectl --kubeconfig ~/.kube/config apply -f kubernetes/backend/deployment.yaml -n std-ext-028-45
-    - kubectl --kubeconfig ~/.kube/config apply -f kubernetes/backend/service.yaml -n std-ext-028-45
-    - kubectl --kubeconfig ~/.kube/config apply -f kubernetes/backend-report/secrets.yaml -n std-ext-028-45
-    - kubectl --kubeconfig ~/.kube/config apply -f kubernetes/backend-report/configmap.yaml -n std-ext-028-45
-    - kubectl --kubeconfig ~/.kube/config apply -f kubernetes/backend-report/deployment.yaml -n std-ext-028-45
-    - kubectl --kubeconfig ~/.kube/config apply -f kubernetes/frontend/secrets.yaml -n std-ext-028-45
-    - kubectl --kubeconfig ~/.kube/config apply -f kubernetes/frontend/configmap.yaml -n std-ext-028-45
-    - kubectl --kubeconfig ~/.kube/config apply -f kubernetes/frontend/deployment.yaml -n std-ext-028-45
-    - kubectl --kubeconfig ~/.kube/config apply -f kubernetes/frontend/service.yaml -n std-ext-028-45
-    - kubectl --kubeconfig ~/.kube/config apply -f kubernetes/frontend/ingress.yaml -n std-ext-028-45
+    - kubectl apply -f kubernetes/backend/secrets.yaml -n std-ext-028-45
+    - kubectl apply -f kubernetes/backend/configmap.yaml -n std-ext-028-45
+    - kubectl apply -f kubernetes/backend/deployment.yaml -n std-ext-028-45
+    - kubectl apply -f kubernetes/backend/service.yaml -n std-ext-028-45
+    - kubectl apply -f kubernetes/backend-report/secrets.yaml -n std-ext-028-45
+    - kubectl apply -f kubernetes/backend-report/configmap.yaml -n std-ext-028-45
+    - kubectl apply -f kubernetes/backend-report/deployment.yaml -n std-ext-028-45
+    - kubectl apply -f kubernetes/frontend/secrets.yaml -n std-ext-028-45
+    - kubectl apply -f kubernetes/frontend/configmap.yaml -n std-ext-028-45
+    - kubectl apply -f kubernetes/frontend/deployment.yaml -n std-ext-028-45
+    - kubectl apply -f kubernetes/frontend/service.yaml -n std-ext-028-45
+    - kubectl apply -f kubernetes/frontend/ingress.yaml -n std-ext-028-45
   after_script:
     - rm -f ~/.kube/config
   environment:
