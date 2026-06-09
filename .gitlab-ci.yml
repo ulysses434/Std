@@ -1,5 +1,6 @@
 stages:
   - module-pipelines
+  - deploy
 
 frontend:
   stage: module-pipelines
@@ -27,3 +28,31 @@ backend-report:
   only:
     changes:
       - backend-report/**/*
+
+deploy-kubernetes:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  before_script:
+    - mkdir -p ~/.kube
+    - echo "${KUBECONFIG_DATA}" | base64 -d > ~/.kube/config
+  script:
+    - kubectl apply -f kubernetes/backend/secrets.yaml
+    - kubectl apply -f kubernetes/backend/configmap.yaml
+    - kubectl apply -f kubernetes/backend/deployment.yaml
+    - kubectl apply -f kubernetes/backend/service.yaml
+    - kubectl apply -f kubernetes/backend-report/secrets.yaml
+    - kubectl apply -f kubernetes/backend-report/configmap.yaml
+    - kubectl apply -f kubernetes/backend-report/deployment.yaml
+    - kubectl apply -f kubernetes/frontend/secrets.yaml
+    - kubectl apply -f kubernetes/frontend/configmap.yaml
+    - kubectl apply -f kubernetes/frontend/deployment.yaml
+    - kubectl apply -f kubernetes/frontend/service.yaml
+    - kubectl apply -f kubernetes/frontend/ingress.yaml
+  after_script:
+    - rm -f ~/.kube/config
+  environment:
+    name: production
+    url: https://aleksandov-aleksandr-028.k8s.praktikum-services.tech
+  only:
+    changes:
+      - kubernetes/**/*

@@ -19,7 +19,8 @@ test:
   script:
     - python -m unittest
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_BRANCH
 
 build:
   stage: build
@@ -34,7 +35,8 @@ build:
         --dockerfile "${CI_PROJECT_DIR}/backend-report/Dockerfile"
         --destination "${CI_REGISTRY_IMAGE}/sausage-store/backend-report:${CI_COMMIT_SHA}"
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_BRANCH
 
 release:
   stage: release
@@ -46,7 +48,8 @@ release:
   script:
     - crane tag ${CI_REGISTRY_IMAGE}/sausage-store/backend-report:${CI_COMMIT_SHA} ${VERSION}
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_BRANCH
 
 deploy-backend-report:
   stage: deploy
@@ -68,4 +71,5 @@ deploy-backend-report:
   - docker rm -f sausage-store-backend-report 2>/dev/null || true
   - docker compose up -d --force-recreate backend-report
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_BRANCH

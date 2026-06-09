@@ -19,7 +19,8 @@ build:
         --dockerfile "${CI_PROJECT_DIR}/frontend/Dockerfile"
         --destination "${CI_REGISTRY_IMAGE}/sausage-frontend:${CI_COMMIT_SHA}"
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+  - if: $CI_MERGE_REQUEST_ID
+  - if: $CI_COMMIT_BRANCH
 
 release:
   stage: release
@@ -33,7 +34,8 @@ release:
     - crane tag $CI_REGISTRY_IMAGE/sausage-frontend:$CI_COMMIT_SHA $VERSION
     - crane tag $CI_REGISTRY_IMAGE/sausage-frontend:$CI_COMMIT_SHA latest
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+  - if: $CI_MERGE_REQUEST_ID
+  - if: $CI_COMMIT_BRANCH
 
 deploy-frontend:
   stage: deploy
@@ -52,4 +54,5 @@ deploy-frontend:
   - docker rm -f sausage-store-frontend 2>/dev/null || true
   - docker compose up -d --force-recreate frontend
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+  - if: $CI_MERGE_REQUEST_ID
+  - if: $CI_COMMIT_BRANCH

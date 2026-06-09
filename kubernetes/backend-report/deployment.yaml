@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-report
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-report
+  template:
+    metadata:
+      labels:
+        app: backend-report
+    spec:
+      containers:
+        - name: backend-report
+          image: gitlab.praktikum-services.ru:5050/std-ext-028-45/sausagestore/sausage-store/backend-report:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: backend-report-secret
+            - configMapRef:
+                name: backend-report-config
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
