@@ -25,10 +25,16 @@ spec:
             - configMapRef:
                 name: backend-config
           volumeMounts:
+            - name: postgres-cert
+              mountPath: /app/postgres.crt
+              subPath: postgres.crt
             - name: mongo-cert
               mountPath: /app/root.crt
               subPath: root.crt
       volumes:
+        - name: postgres-cert
+          secret:
+            secretName: postgres-cert
         - name: mongo-cert
           secret:
             secretName: mongo-cert

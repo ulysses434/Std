@@ -17,7 +17,8 @@ spec:
       containers:
         - name: frontend
           image: gitlab.praktikum-services.ru:5050/std-ext-028-45/sausagestore/sausage-frontend:latest
-          command: ["nginx", "-g", "daemon off;"]
+          command: ["/usr/sbin/nginx"]
+          args: ["-g", "daemon off;"]
           ports:
             - containerPort: 8080
           volumeMounts:
