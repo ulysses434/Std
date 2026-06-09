@@ -35,6 +35,7 @@ deploy-kubernetes:
   before_script:
     - mkdir -p ~/.kube
     - echo "${KUBECONFIG_DATA}" | base64 -d > ~/.kube/config
+    - export KUBECONFIG=~/.kube/config
   script:
     - kubectl apply -f kubernetes/backend/secrets.yaml -n std-ext-028-45
     - kubectl apply -f kubernetes/backend/configmap.yaml -n std-ext-028-45
