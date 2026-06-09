@@ -36,23 +36,22 @@ deploy-kubernetes:
     - mkdir -p ~/.kube
     - echo "${KUBECONFIG_DATA}" | base64 -d > ~/.kube/config
     - export KUBECONFIG=~/.kube/config
-    - unset KUBERNETES_SERVICE_HOST KUBERNETES_SERVICE_PORT
-    - kubectl config view
+    - apk add --no-cache vault || true
+    - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=sausage-store jwt=$CI_JOB_JWT)"
+    - export SPRING_DATASOURCE_URL="$(vault kv get -field=spring.datasource.url secret/sausage-store)"
+    - export SPRING_DATASOURCE_USERNAME="$(vault kv get -field=spring.datasource.username secret/sausage-store)"
+    - export SPRING_DATASOURCE_PASSWORD="$(vault kv get -field=spring.datasource.password secret/sausage-store)"
+    - export SPRING_DATA_MONGODB_URI="$(vault kv get -field=spring.data.mongodb.uri secret/sausage-store)"
   script:
-    - kubectl apply -f kubernetes/backend/secrets.yaml -n std-ext-028-45
+    - kubectl create secret generic backend-secret -n std-ext-028-45 \
+        --from-literal=SPRING_DATASOURCE_URL="${SPRING_DATASOURCE_URL}" \
+        --from-literal=SPRING_DATASOURCE_USERNAME="${SPRING_DATASOURCE_USERNAME}" \
+        --from-literal=SPRING_DATASOURCE_PASSWORD="${SPRING_DATASOURCE_PASSWORD}" \
+        --from-literal=SPRING_DATA_MONGODB_URI="${SPRING_DATA_MONGODB_URI}" \
+        --dry-run=client -o yaml | kubectl apply -f -
     - kubectl apply -f kubernetes/backend/configmap.yaml -n std-ext-028-45
     - kubectl apply -f kubernetes/backend/deployment.yaml -n std-ext-028-45
     - kubectl apply -f kubernetes/backend/service.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/backend-report/secrets.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/backend-report/configmap.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/backend-report/deployment.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/frontend/secrets.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/frontend/configmap.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/frontend/deployment.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/frontend/service.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/frontend/ingress.yaml -n std-ext-028-45
-  after_script:
-    - rm -f ~/.kube/config
   environment:
     name: production
     url: https://aleksandov-aleksandr-028.k8s.praktikum-services.tech

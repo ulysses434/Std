@@ -3,15 +3,10 @@ kind: Deployment
 metadata:
   name: backend-report
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: backend-report
   template:
-    metadata:
-      labels:
-        app: backend-report
     spec:
+      imagePullSecrets:
+        - name: docker-config-secret
       containers:
         - name: backend-report
           image: gitlab.praktikum-services.ru:5050/std-ext-028-45/sausagestore/sausage-store/backend-report:latest

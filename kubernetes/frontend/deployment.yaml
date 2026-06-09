@@ -3,15 +3,10 @@ kind: Deployment
 metadata:
   name: frontend
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: frontend
   template:
-    metadata:
-      labels:
-        app: frontend
     spec:
+      imagePullSecrets:
+        - name: docker-config-secret
       containers:
         - name: frontend
           image: gitlab.praktikum-services.ru:5050/std-ext-028-45/sausagestore/sausage-frontend:latest

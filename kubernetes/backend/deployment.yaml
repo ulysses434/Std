@@ -12,6 +12,8 @@ spec:
       labels:
         app: backend
     spec:
+      imagePullSecrets:
+        - name: docker-config-secret
       containers:
         - name: backend
           image: gitlab.praktikum-services.ru:5050/std-ext-028-45/sausagestore/sausage-store/backend:latest
