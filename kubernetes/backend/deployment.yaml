@@ -24,10 +24,11 @@ spec:
                 name: backend-secret
             - configMapRef:
                 name: backend-config
-          resources:
-            requests:
-              memory: "256Mi"
-              cpu: "100m"
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
+          volumeMounts:
+            - name: mongo-cert
+              mountPath: /app/root.crt
+              subPath: root.crt
+      volumes:
+        - name: mongo-cert
+          secret:
+            secretName: mongo-cert
