@@ -52,17 +52,17 @@ deploy-kubernetes:
         --from-literal=SPRING_DATASOURCE_PASSWORD="${SPRING_DATASOURCE_PASSWORD}" \
         --from-literal=SPRING_DATA_MONGODB_URI="${SPRING_DATA_MONGODB_URI}" \
         --dry-run=client -o yaml | kubectl apply -f -
-    - kubectl apply -f kubernetes/backend/configmap.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/backend/deployment.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/backend/service.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/backend-report/secrets.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/backend-report/configmap.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/backend-report/deployment.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/frontend/secrets.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/frontend/configmap.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/frontend/deployment.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/frontend/service.yaml -n std-ext-028-45
-    - kubectl apply -f kubernetes/frontend/ingress.yaml -n std-ext-028-45
+    - |
+      kubectl create secret generic backend-report-secret -n std-ext-028-45 \
+        --from-literal=DB="${SPRING_DATA_MONGODB_URI}" \
+        --dry-run=client -o yaml | kubectl apply -f -
+    - kubectl apply -f kubernetes/backend/ -n std-ext-028-45
+    - kubectl apply -f kubernetes/backend-report/ -n std-ext-028-45
+    - kubectl apply -f kubernetes/frontend/ -n std-ext-028-45
+    - kubectl wait --for=condition=Available deployment/backend -n std-ext-028-45 --timeout=120s
+    - kubectl wait --for=condition=Available deployment/backend-report -n std-ext-028-45 --timeout=120s
+    - kubectl wait --for=condition=Available deployment/frontend -n std-ext-028-45 --timeout=120s
+
   after_script:
     - rm -f ~/.kube/config
   environment:
