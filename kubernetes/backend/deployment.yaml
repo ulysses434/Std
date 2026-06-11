@@ -19,6 +19,12 @@ spec:
           image: gitlab.praktikum-services.ru:5050/std-ext-028-45/sausagestore/sausage-store/backend:latest
           ports:
             - containerPort: 8080
+          env:
+            - name: SPRING_CLOUD_VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: VAULT_TOKEN
           envFrom:
             - secretRef:
                 name: backend-secret
