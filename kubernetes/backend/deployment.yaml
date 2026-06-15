@@ -4,6 +4,12 @@ metadata:
   name: backend
 spec:
   replicas: 2
+  revisionHistoryLimit: 12
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 20%
   selector:
     matchLabels:
       app: backend
@@ -37,6 +43,13 @@ spec:
             - name: mongo-cert
               mountPath: /app/root.crt
               subPath: root.crt
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
       volumes:
         - name: postgres-cert
           secret:
