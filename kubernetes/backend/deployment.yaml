@@ -31,6 +31,8 @@ spec:
                 secretKeyRef:
                   name: backend-secret
                   key: VAULT_TOKEN
+            - name: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+              value: "3"      
           envFrom:
             - secretRef:
                 name: backend-secret
