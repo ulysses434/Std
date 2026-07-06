@@ -1,5 +1,6 @@
 stages:
   - module-pipelines
+  - deploy
 
 frontend:
   stage: module-pipelines
@@ -27,3 +28,47 @@ backend-report:
   only:
     changes:
       - backend-report/**/*
+
+deploy-kubernetes:
+  stage: deploy
+  image: docker:24.0.5
+  before_script:
+    - apk add --no-cache vault curl
+    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    - chmod +x kubectl && mv kubectl /usr/local/bin/
+    - mkdir -p ~/.kube
+    - echo "${KUBECONFIG_DATA}" | base64 -d > ~/.kube/config
+    - export KUBECONFIG=~/.kube/config
+  script:
+    - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=sausage-store jwt=$CI_JOB_JWT)"
+    - export SPRING_DATASOURCE_URL="$(vault kv get -field=spring.datasource.url secret/sausage-store)"
+    - export SPRING_DATASOURCE_USERNAME="$(vault kv get -field=spring.datasource.username secret/sausage-store)"
+    - export SPRING_DATASOURCE_PASSWORD="$(vault kv get -field=spring.datasource.password secret/sausage-store)"
+    - export SPRING_DATA_MONGODB_URI="$(vault kv get -field=spring.data.mongodb.uri secret/sausage-store)"
+    - |
+      kubectl create secret generic backend-secret -n std-ext-028-45 \
+        --from-literal=SPRING_DATASOURCE_URL="${SPRING_DATASOURCE_URL}" \
+        --from-literal=SPRING_DATASOURCE_USERNAME="${SPRING_DATASOURCE_USERNAME}" \
+        --from-literal=SPRING_DATASOURCE_PASSWORD="${SPRING_DATASOURCE_PASSWORD}" \
+        --from-literal=SPRING_DATA_MONGODB_URI="${SPRING_DATA_MONGODB_URI}" \
+        --from-literal=VAULT_TOKEN="${VAULT_TOKEN}" \
+        --dry-run=client -o yaml | kubectl apply -f -
+    - |
+      kubectl create secret generic backend-report-secret -n std-ext-028-45 \
+        --from-literal=DB="${SPRING_DATA_MONGODB_URI}" \
+        --dry-run=client -o yaml | kubectl apply -f -
+    - kubectl apply -f kubernetes/backend/ -n std-ext-028-45
+    - kubectl apply -f kubernetes/backend-report/ -n std-ext-028-45
+    - kubectl apply -f kubernetes/frontend/ -n std-ext-028-45
+    - kubectl wait --for=condition=Available deployment/backend -n std-ext-028-45 --timeout=200s
+    - kubectl wait --for=condition=Available deployment/backend-report -n std-ext-028-45 --timeout=200s
+    - kubectl wait --for=condition=Available deployment/frontend -n std-ext-028-45 --timeout=200s
+
+  after_script:
+    - rm -f ~/.kube/config
+  environment:
+    name: production
+    url: https://aleksandov-aleksandr-028.k8s.praktikum-services.tech
+  only:
+    changes:
+      - kubernetes/**/*

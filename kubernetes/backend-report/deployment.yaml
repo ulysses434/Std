@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-report
+spec:
+  replicas: 2
+  revisionHistoryLimit: 12
+  selector:
+    matchLabels:
+      app: backend-report
+  template:
+    metadata:
+      labels:
+        app: backend-report
+    spec:
+      imagePullSecrets:
+        - name: docker-config-secret
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: backend-report
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: backend-report
+          image: gitlab.praktikum-services.ru:5050/std-ext-028-45/sausagestore/sausage-store/backend-report:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: backend-report-secret
+            - configMapRef:
+                name: backend-report-config
+          volumeMounts:
+            - name: mongo-cert
+              mountPath: /app/root.crt
+              subPath: root.crt
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+      volumes:
+        - name: mongo-cert
+          secret:
+            secretName: mongo-cert
