@@ -64,7 +64,6 @@ public class OrderController {
 
         order.setOrderProducts(orderProducts);
         this.orderService.update(order);
-
         for (OrderProduct op : orderProducts) {
             String type = op.getProduct().getName();
             meterRegistry.counter("sausage.orders.total", "type", type).increment();
