@@ -2,6 +2,7 @@ package com.yandex.practicum.devops.service;
 
 import com.yandex.practicum.devops.model.Order;
 import com.yandex.practicum.devops.repository.OrderRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,12 +12,16 @@ import java.time.LocalDate;
 @Transactional
 public class OrderServiceImpl implements OrderService {
 
-    private OrderRepository orderRepository;
-    private BusinessMetricsService metricsService;
+    private final OrderRepository orderRepository;
+    private final BusinessMetricsService metricsService;
+    private final MeterRegistry meterRegistry;
 
-    public OrderServiceImpl(OrderRepository orderRepository, BusinessMetricsService metricsService) {
+    public OrderServiceImpl(OrderRepository orderRepository,
+                            BusinessMetricsService metricsService,
+                            MeterRegistry meterRegistry) {
         this.orderRepository = orderRepository;
         this.metricsService = metricsService;
+        this.meterRegistry = meterRegistry;
     }
 
     @Override
@@ -28,15 +33,22 @@ public class OrderServiceImpl implements OrderService {
     public Order create(Order order) {
         order.setDateCreated(LocalDate.now());
         metricsService.initOrderCounters();
-        Order o = this.orderRepository.save(order);
-        metricsService.orderSausage(o);
-        return o;
+        Order saved = this.orderRepository.save(order);
+        saved.getProducts().forEach(op -> {
+            String type = op.getProduct().getName();
+            meterRegistry.counter("sausage.orders.total", "type", type).increment();
+        });
+        metricsService.orderSausage(saved);
+        return saved;
     }
 
     @Override
     public void update(Order order) {
         this.orderRepository.save(order);
+        order.getProducts().forEach(op -> {
+            String type = op.getProduct().getName();
+            meterRegistry.counter("sausage.orders.total", "type", type).increment();
+        });
         metricsService.orderSausage(order);
-
     }
 }
