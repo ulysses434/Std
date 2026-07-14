@@ -1,6 +1,7 @@
 package com.yandex.practicum.devops.service;
 
 import com.yandex.practicum.devops.model.Order;
+import com.yandex.practicum.devops.model.OrderProduct;
 import com.yandex.practicum.devops.repository.OrderRepository;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
@@ -34,10 +35,11 @@ public class OrderServiceImpl implements OrderService {
         order.setDateCreated(LocalDate.now());
         metricsService.initOrderCounters();
         Order saved = this.orderRepository.save(order);
-        saved.getProducts().forEach(op -> {
+        // Увеличиваем счётчик для каждого продукта в заказе
+        for (OrderProduct op : saved.getOrderProducts()) {
             String type = op.getProduct().getName();
             meterRegistry.counter("sausage.orders.total", "type", type).increment();
-        });
+        }
         metricsService.orderSausage(saved);
         return saved;
     }
@@ -45,10 +47,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void update(Order order) {
         this.orderRepository.save(order);
-        order.getProducts().forEach(op -> {
+        for (OrderProduct op : order.getOrderProducts()) {
             String type = op.getProduct().getName();
             meterRegistry.counter("sausage.orders.total", "type", type).increment();
-        });
+        }
         metricsService.orderSausage(order);
     }
 }
