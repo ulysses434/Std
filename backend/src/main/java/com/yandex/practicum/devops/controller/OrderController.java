@@ -8,6 +8,7 @@ import com.yandex.practicum.devops.model.OrderStatus;
 import com.yandex.practicum.devops.service.OrderProductService;
 import com.yandex.practicum.devops.service.OrderService;
 import com.yandex.practicum.devops.service.ProductService;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,14 +26,19 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/orders")
 public class OrderController {
 
-    ProductService productService;
-    OrderService orderService;
-    OrderProductService orderProductService;
+    private final ProductService productService;
+    private final OrderService orderService;
+    private final OrderProductService orderProductService;
+    private final MeterRegistry meterRegistry;
 
-    public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService) {
+    public OrderController(ProductService productService,
+                           OrderService orderService,
+                           OrderProductService orderProductService,
+                           MeterRegistry meterRegistry) {
         this.productService = productService;
         this.orderService = orderService;
         this.orderProductService = orderProductService;
+        this.meterRegistry = meterRegistry;
     }
 
     @GetMapping
@@ -57,8 +63,12 @@ public class OrderController {
         }
 
         order.setOrderProducts(orderProducts);
-
         this.orderService.update(order);
+
+        for (OrderProduct op : orderProducts) {
+            String type = op.getProduct().getName();
+            meterRegistry.counter("sausage.orders.total", "type", type).increment();
+        }
 
         String uri = ServletUriComponentsBuilder
           .fromCurrentServletMapping()
@@ -72,6 +82,9 @@ public class OrderController {
     }
 
     private void validateProductsExistence(List<OrderProductDto> orderProducts) {
+        if (orderProducts == null) {
+            return;
+        }
         List<OrderProductDto> list = orderProducts
           .stream()
           .filter(op -> Objects.isNull(productService.getProduct(op
@@ -80,7 +93,7 @@ public class OrderController {
           .collect(Collectors.toList());
 
         if (!CollectionUtils.isEmpty(list)) {
-        throw new ResourceNotFoundException("Product not found");
+            throw new ResourceNotFoundException("Product not found");
         }
     }
 
