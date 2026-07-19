@@ -29,46 +29,64 @@ backend-report:
     changes:
       - backend-report/**/*
 
-deploy-kubernetes:
+deploy-local:
   stage: deploy
-  image: docker:24.0.5
-  before_script:
-    - apk add --no-cache vault curl
-    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-    - chmod +x kubectl && mv kubectl /usr/local/bin/
-    - mkdir -p ~/.kube
-    - echo "${KUBECONFIG_DATA}" | base64 -d > ~/.kube/config
-    - export KUBECONFIG=~/.kube/config
+  tags:
+    - shell
+    - local
   script:
-    - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=sausage-store jwt=$CI_JOB_JWT)"
-    - export SPRING_DATASOURCE_URL="$(vault kv get -field=spring.datasource.url secret/sausage-store)"
-    - export SPRING_DATASOURCE_USERNAME="$(vault kv get -field=spring.datasource.username secret/sausage-store)"
-    - export SPRING_DATASOURCE_PASSWORD="$(vault kv get -field=spring.datasource.password secret/sausage-store)"
-    - export SPRING_DATA_MONGODB_URI="$(vault kv get -field=spring.data.mongodb.uri secret/sausage-store)"
+    - echo "=== Локальный деплой Sausage Store ==="
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    
+    # Создаём сеть, если не существует
+    - docker network create sausage-store 2>/dev/null || true
+    
+    # Останавливаем и удаляем старые контейнеры
+    - docker rm -f backend backend-report frontend 2>/dev/null || true
+    
+    # Backend
+    - echo "Запускаем backend..."
     - |
-      kubectl create secret generic backend-secret -n std-ext-028-45 \
-        --from-literal=SPRING_DATASOURCE_URL="${SPRING_DATASOURCE_URL}" \
-        --from-literal=SPRING_DATASOURCE_USERNAME="${SPRING_DATASOURCE_USERNAME}" \
-        --from-literal=SPRING_DATASOURCE_PASSWORD="${SPRING_DATASOURCE_PASSWORD}" \
-        --from-literal=SPRING_DATA_MONGODB_URI="${SPRING_DATA_MONGODB_URI}" \
-        --from-literal=VAULT_TOKEN="${VAULT_TOKEN}" \
-        --dry-run=client -o yaml | kubectl apply -f -
+      docker run -d --name backend \
+        --network sausage-store \
+        -p 8080:8080 \
+        -e SPRING_DATASOURCE_URL="$SPRING_DATASOURCE_URL" \
+        -e SPRING_DATASOURCE_USERNAME="$SPRING_DATASOURCE_USERNAME" \
+        -e SPRING_DATASOURCE_PASSWORD="$SPRING_DATASOURCE_PASSWORD" \
+        -e SPRING_DATA_MONGODB_URI="$SPRING_DATA_MONGODB_URI" \
+        -e LOG_PATH=/app/logs \
+        -e REPORT_PATH=/app/reports \
+        -v /home/ulyss/.postgresql/root.crt:/app/postgres.crt:ro \
+        -v /home/ulyss/.postgresql/root.crt:/app/root.crt:ro \
+        ${CI_REGISTRY_IMAGE}/sausage-store/backend:latest
+    
+    # Backend-report
+    - echo "Запускаем backend-report..."
     - |
-      kubectl create secret generic backend-report-secret -n std-ext-028-45 \
-        --from-literal=DB="${SPRING_DATA_MONGODB_URI}" \
-        --dry-run=client -o yaml | kubectl apply -f -
-    - kubectl apply -f kubernetes/backend/ -n std-ext-028-45
-    - kubectl apply -f kubernetes/backend-report/ -n std-ext-028-45
-    - kubectl apply -f kubernetes/frontend/ -n std-ext-028-45
-    - kubectl wait --for=condition=Available deployment/backend -n std-ext-028-45 --timeout=200s
-    - kubectl wait --for=condition=Available deployment/backend-report -n std-ext-028-45 --timeout=200s
-    - kubectl wait --for=condition=Available deployment/frontend -n std-ext-028-45 --timeout=200s
-
-  after_script:
-    - rm -f ~/.kube/config
-  environment:
-    name: production
-    url: https://aleksandov-aleksandr-028.k8s.praktikum-services.tech
+      docker run -d --name backend-report \
+        --network sausage-store \
+        -e DB="$SPRING_DATA_MONGODB_URI" \
+        -e PORT=8080 \
+        -v /home/ulyss/.postgresql/root.crt:/app/root.crt:ro \
+        ${CI_REGISTRY_IMAGE}/sausage-store/backend-report:latest
+    
+    # Frontend
+    - echo "Запускаем frontend..."
+    - |
+      docker run -d --name frontend \
+        --network sausage-store \
+        -p 80:80 \
+        -e DEFAULT_HOST=backend \
+        ${CI_REGISTRY_IMAGE}/sausage-frontend:latest
+    
+    # Проверка
+    - echo "Ожидаем запуска backend (30 секунд)..."
+    - sleep 30
+    - echo "=== Проверка здоровья ==="
+    - curl -s http://localhost:8080/actuator/health || echo "Backend ещё не готов"
+    - echo ""
+    - echo "=== Все контейнеры ==="
+    - docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+  
   only:
-    changes:
-      - kubernetes/**/*
+    - main
