@@ -141,25 +141,3 @@ cd backend-report
 pip install -r requirements.txt
 PORT=8080 DB=mongodb://localhost:27017/reports python app.py
 ```
-
-## Что было исправлено для локального запуска
-
-Исходный `docker-compose.yml` был завязан на инфраструктуру GitLab CI (registry,
-Vault, управляемые БД Yandex Cloud и сертификаты). Для самодостаточного запуска
-на хосте внесены правки:
-
-- **Backend** ([`application.properties`](backend/src/main/resources/application.properties)):
-  убрана зависимость от Vault (`spring.config.import=vault://...`), секреты БД
-  берутся из переменных окружения; добавлен
-  `spring.jpa.hibernate.ddl-auto=update`, чтобы Hibernate создавал схему в свежей БД.
-- **Backend** ([`Dockerfile`](backend/Dockerfile)): убраны загрузка и импорт
-  сертификата Yandex Cloud (для локального PostgreSQL TLS не нужен).
-- **Frontend** ([`Dockerfile`](frontend/Dockerfile), [`default.conf`](frontend/default.conf)):
-  рантайм заменён с `jwilder/nginx-proxy` (требует docker.sock и docker-gen) на
-  обычный Nginx со статическим проксированием `/api/*` → `backend:8080`.
-- **Backend-report** ([`app.py`](backend-report/app.py)): вызов внешнего API
-  обёрнут в `try/except` (сбой не роняет сервис), порт приводится к `int`,
-  URL отчёта настраивается через `REPORT_URL`.
-- **docker-compose.yml**: добавлены сервисы `postgres` и `mongo`, убраны
-  переменные `${CI_REGISTRY_IMAGE}`, тома `/opt/certs/*`, добавлены healthcheck
-  и `depends_on` с условием `service_healthy`.
