@@ -1,14 +1,20 @@
 from flask import Flask, jsonify
 import os
+import logging
 import requests
 import pymongo
 from apscheduler.schedulers.background import BackgroundScheduler
-from flask import Flask
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.INFO)
 
-DB = os.environ.get('DB') if os.environ.get('DB') else "mongodb://localhost:27017/test"
-client = pymongo.MongoClient(DB)
+REPORT_URL = os.environ.get(
+    'REPORT_URL',
+    'https://d5dg7f2abrq3u84p3vpr.apigw.yandexcloud.net/report'
+)
+DB = os.environ.get('DB') or "mongodb://localhost:27017/test"
+
+client = pymongo.MongoClient(DB, serverSelectionTimeoutMS=5000)
 parsedUri = pymongo.uri_parser.parse_uri(DB)
 db = client[parsedUri['database']]
 
@@ -20,9 +26,13 @@ def home():
 
 
 def load_report():
-    response = requests.get("https://d5dg7f2abrq3u84p3vpr.apigw.yandexcloud.net/report")
-    db.reports.insert_one(response.json())
-    print("Inserted a new report to the database: " + response.text)
+    try:
+        response = requests.get(REPORT_URL, timeout=10)
+        response.raise_for_status()
+        db.reports.insert_one(response.json())
+        logging.info("Inserted a new report to the database: %s", response.text)
+    except Exception as e:
+        logging.warning("Не удалось загрузить отчёт: %s", e)
 
 
 if __name__ == "__main__":
@@ -30,4 +40,5 @@ if __name__ == "__main__":
     sched.add_job(load_report, 'interval', minutes=5)
     sched.start()
     load_report()
-    app.run(host='0.0.0.0', debug=True, port=os.environ.get('PORT'), use_reloader=False)
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port, use_reloader=False)

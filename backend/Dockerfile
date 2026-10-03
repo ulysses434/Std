@@ -1,21 +1,15 @@
 FROM maven:3.9.3-eclipse-temurin-20-alpine AS builder
-ARG VERSION=${VERSION}
 WORKDIR /usr/src/app
 COPY ./src ./src
-COPY *.xml ./
-RUN wget -O  YandexInternalRootCA.crt https://storage.yandexcloud.net/cloud-certs/CA.pem \
-    && mvn package -Dversion.application=${VERSION} -Dmaven.test.skip=true \
+COPY pom.xml ./
+RUN mvn package -Dmaven.test.skip=true \
     && mv target/*.jar target/app.jar
 
 FROM eclipse-temurin:17-jre-alpine
-RUN apk add --no-cache curl
-WORKDIR /app
-COPY --from=builder /usr/src/app/YandexInternalRootCA.crt .
-RUN keytool -importcert -file YandexInternalRootCA.crt \
-    -alias yandex -cacerts -storepass changeit -noprompt \
-    && rm -rf YandexInternalRootCA.crt \
+RUN apk add --no-cache curl \
     && addgroup --system jaruser \
     && adduser -S -s /bin/false -G jaruser jaruser -D -H
+WORKDIR /app
 COPY --chown=jaruser:jaruser \
      --from=builder /usr/src/app/target/app.jar ./sausage-store.jar
 EXPOSE 8080

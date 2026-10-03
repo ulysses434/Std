@@ -1,48 +1,59 @@
 services:
-  backend-blue:
-    image: ${CI_REGISTRY_IMAGE}/sausage-store/backend:${VERSION}
-    container_name: backend-blue
+  postgres:
+    image: postgres:15-alpine
+    container_name: sausage-postgres
     environment:
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      SPRING_DATA_MONGODB_URI: ${REPORTS_MONGODB_URI}
-      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "5"
-      VIRTUAL_HOST: "backend"
-      VIRTUAL_PORT: "8080"
+      POSTGRES_DB: ${POSTGRES_DB:-sausage}
+      POSTGRES_USER: ${POSTGRES_USER:-sausage}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sausage}
+    ports:
+      - "5432:5432"
     volumes:
-      - /opt/certs/CA.pem:/app/postgres.crt:ro
-      - /opt/certs/CA.pem:/app/root.crt:ro
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sausage} -d ${POSTGRES_DB:-sausage}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
     networks:
       - sausage-store
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "-s", "http://localhost:8080/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      start_period: 90s
-      retries: 5
-    restart: unless-stopped
 
-  backend-green:
-    image: ${CI_REGISTRY_IMAGE}/sausage-store/backend:${VERSION}
-    container_name: backend-green
-    environment:
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      SPRING_DATA_MONGODB_URI: ${REPORTS_MONGODB_URI}
-      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "5"
-      VIRTUAL_HOST: "backend"
-      VIRTUAL_PORT: "8080"
+  mongo:
+    image: mongo:7
+    container_name: sausage-mongo
+    ports:
+      - "27017:27017"
     volumes:
-      - /opt/certs/CA.pem:/app/postgres.crt:ro
-      - /opt/certs/CA.pem:/app/root.crt:ro
+      - mongodata:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
     networks:
       - sausage-store
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: sausage-store/backend:local
+    container_name: sausage-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-sausage}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-sausage}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-sausage}
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/reports
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "5"
+      REPORT_PATH: /tmp
+      LOG_PATH: /tmp
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "--fail", "-s", "http://localhost:8080/actuator/health"]
       interval: 10s
@@ -50,18 +61,28 @@ services:
       start_period: 90s
       retries: 5
     restart: unless-stopped
+    networks:
+      - sausage-store
 
   backend-report:
     build:
       context: ./backend-report
       dockerfile: Dockerfile
-    image: ${CI_REGISTRY_IMAGE}/sausage-store/backend-report:${VERSION}
-    container_name: sausage-store-backend-report
+    image: sausage-store/backend-report:local
+    container_name: sausage-backend-report
     environment:
       PORT: "8080"
-      DB: ${REPORTS_MONGODB_URI}
-    volumes:
-      - /opt/certs/CA.pem:/app/root.crt:ro
+      DB: mongodb://mongo:27017/reports
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=3)"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
     networks:
       - sausage-store
 
@@ -69,17 +90,19 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    image: ${CI_REGISTRY_IMAGE}/sausage-frontend:${VERSION}
-    container_name: sausage-store-frontend
-    environment:
-      DOCKER_HOST: "unix:///tmp/docker.sock"
-      DEFAULT_HOST: "backend"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
+    image: sausage-store/frontend:local
+    container_name: sausage-frontend
     ports:
       - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
     networks:
       - sausage-store
+
+volumes:
+  pgdata:
+  mongodata:
 
 networks:
   sausage-store:
